@@ -2,245 +2,207 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Upload, X, ShieldAlert, MonitorSmartphone } from 'lucide-react'
+import { ArrowLeft, Upload, Video as VideoIcon, Layers, FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 
-export default function NovoStoryPage() {
+export default function NovoVideoTrilhaPage() {
     const router = useRouter()
     const supabase = createClient()
 
-    const [legenda, setLegenda] = useState('')
-    const [imagemUrl, setImagemUrl] = useState('')
-    const [duracaoHoras, setDuracaoHoras] = useState('24')
+    const [titulo, setTitulo] = useState('')
+    const [descricao, setDescricao] = useState('')
+    const [categoria, setCategoria] = useState('')
+    const [novaCategoria, setNovaCategoria] = useState('')
+    const [videoUrl, setVideoUrl] = useState('')
+    const [ordem, setOrdem] = useState(0)
     const [salvando, setSalvando] = useState(false)
 
     // Upload Supabase Storage
     const [uploadando, setUploadando] = useState(false)
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
     async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
         if (!file) return
 
-        if (file.size > 10 * 1024 * 1024) { toast.error('Limite excedido: Foto/Arte deve ter pesagem menor que 10MB.'); return }
-        if (!file.type.startsWith('image/')) { toast.error('Falha de Tipo: O arquivo deve ser primariamente imagem.'); return }
+        if (file.size > 200 * 1024 * 1024) {
+            toast.error('Limite excedido: Vídeo deve ser menor que 200MB.')
+            return
+        }
+        if (!file.type.startsWith('video/')) {
+            toast.error('Falha de Tipo: O arquivo deve ser primariamente um vídeo (.mp4, .mov).')
+            return
+        }
 
         setUploadando(true)
 
         const ext = file.name.split('.').pop()
-        const path = `stories/${Date.now()}.${ext}`
+        const path = `trilhas/${Date.now()}.${ext}`
 
         const { error } = await supabase.storage
             .from('ct-boxe-media')
             .upload(path, file, { upsert: true })
 
         if (error) {
-            toast.error('Erro de I/O de Storage no Supabase. Cheque se a política ct-boxe-media não quebrou.')
+            toast.error('Erro de I/O de Storage no Supabase.')
             setUploadando(false)
             return
         }
 
         const { data: urlData } = supabase.storage.from('ct-boxe-media').getPublicUrl(path)
-        setImagemUrl(urlData.publicUrl)
-        setPreviewUrl(urlData.publicUrl)
+        setVideoUrl(urlData.publicUrl)
         setUploadando(false)
-        toast.success('Assets decodificados com sucesso pro Storage!')
+        toast.success('Vídeo pareado no servidor com sucesso!')
     }
 
-    async function handlePublicar() {
-        if (!imagemUrl && !legenda.trim()) {
-            toast.error('Operação Inocua: Arte (imagem) ou conteúdo em texto vazios.')
+    async function handleSalvar() {
+        const catFinal = categoria === 'nova' ? novaCategoria.trim() : categoria
+
+        if (!videoUrl || !titulo.trim() || !catFinal) {
+            toast.error('Preencha os dados obrigatórios: Título, Categoria e Vídeo.')
             return
         }
 
         setSalvando(true)
 
-        const expiraEm = new Date()
-        expiraEm.setHours(expiraEm.getHours() + parseInt(duracaoHoras))
-
-        const { error } = await supabase.from('stories').insert({
-            imagem_url: imagemUrl || null,
-            legenda: legenda.trim() || null,
-            autor: 'Argel Riboli',
-            expira_em: expiraEm.toISOString(),
+        const { error } = await supabase.from('trilhas_videos').insert({
+            titulo: titulo.trim(),
+            descricao: descricao.trim() || null,
+            categoria: catFinal,
+            video_url: videoUrl,
+            ordem: ordem,
             ativo: true,
         })
 
         if (error) {
-            toast.error('Erro ao compilar o banco de Stories.')
+            toast.error('Erro ao injetar vídeo na trilha.')
             setSalvando(false)
             return
         }
 
-        toast.success('Engine engatilhada: O Story está caindo em D-0 para os atletas!')
+        toast.success('Vídeo arquivado na biblioteca para acesso dos alunos!')
         router.push('/stories')
     }
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6 pb-12 animate-in slide-in-from-bottom-2 duration-500">
+        <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-in slide-in-from-bottom-2 duration-500">
 
             <button onClick={() => router.back()} className="group flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors w-fit">
                 <div className="bg-white border border-gray-200 p-1.5 rounded-md group-hover:border-gray-300 transition-colors shadow-sm">
                     <ArrowLeft className="h-4 w-4" />
                 </div>
-                Radar de Stories
+                Voltar à Trilha
             </button>
 
             <div>
                 <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2 mb-1">
-                    <MonitorSmartphone className="w-6 h-6 text-[#CC0000]" /> Studio de Gravação / Arte
+                    <VideoIcon className="w-6 h-6 text-[#CC0000]" /> Novo Vídeo Explicativo
                 </h2>
-                <p className="text-sm font-bold text-gray-400 tracking-wide uppercase">Crie seu outdoor orgânico na palma da mão do seu aluno.</p>
+                <p className="text-sm font-bold text-gray-400 tracking-wide uppercase mt-1">
+                    Adicione material permanente para a biblioteca técnica dos alunos.
+                </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gray-100">
 
-                {/* Lado Esquerdo - Controles */}
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8 space-y-6 self-start relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-gray-200 to-gray-400" />
+                {/* Left Panel */}
+                <div className="p-6 sm:p-8 flex-1 space-y-6 bg-gray-50/30">
+                    <div>
+                        <label className="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2 mb-3">
+                            <FileText className="w-4 h-4 text-gray-400" /> Título e Descrição
+                        </label>
+                        <div className="space-y-4">
+                            <input
+                                value={titulo}
+                                onChange={e => setTitulo(e.target.value)}
+                                placeholder="Dê um título forte (ex: Como enrolar a bandagem 3m)"
+                                className="w-full p-4 text-sm font-bold text-gray-900 border border-gray-200 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-all shadow-sm"
+                            />
+                            <textarea
+                                value={descricao}
+                                onChange={e => setDescricao(e.target.value)}
+                                placeholder="Detalhes ou passos do vídeo (opcional)"
+                                rows={4}
+                                className="w-full p-4 text-sm font-medium text-gray-600 border border-gray-200 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-all shadow-sm resize-none"
+                            />
+                        </div>
+                    </div>
 
-                    {/* Upload Engine */}
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                            <ShieldAlert className="w-3.5 h-3.5" /> Midia Principal
+                    <div className="pt-6 border-t border-gray-100">
+                        <label className="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2 mb-3">
+                            <Layers className="w-4 h-4 text-gray-400" /> Categoria / Módulo
+                        </label>
+                        <select
+                            value={categoria}
+                            onChange={e => setCategoria(e.target.value)}
+                            className="w-full p-4 text-sm font-bold text-gray-900 border border-gray-200 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-all shadow-sm appearance-none mb-3"
+                        >
+                            <option value="">Selecione um Módulo</option>
+                            <option value="Equipamentos e Manuseio">Equipamentos e Manuseio</option>
+                            <option value="Postura e Base">Postura e Base</option>
+                            <option value="Fundamentos de Combate">Fundamentos de Combate</option>
+                            <option value="nova">+ Criar Novo Módulo</option>
+                        </select>
+
+                        {categoria === 'nova' && (
+                            <input
+                                value={novaCategoria}
+                                onChange={e => setNovaCategoria(e.target.value)}
+                                placeholder="Nome do novo Módulo"
+                                className="w-full p-4 text-sm font-bold text-gray-900 border border-[#CC0000] bg-red-50/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CC0000] focus:border-[#CC0000] transition-all shadow-sm"
+                            />
+                        )}
+                    </div>
+                </div>
+
+                {/* Right Panel */}
+                <div className="p-6 sm:p-8 flex-1 space-y-6 relative flex flex-col justify-between">
+                    <div>
+                        <label className="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2 mb-3">
+                            <Upload className="w-4 h-4 text-gray-400" /> Motor de Upload de Vídeo
                         </label>
 
-                        {!previewUrl && (
-                            <label className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-[#CC0000] hover:bg-red-50/50 transition-all bg-gray-50/50 group">
+                        {!videoUrl ? (
+                            <label className="flex flex-col items-center justify-center aspect-[4/3] border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-[#CC0000] hover:bg-red-50/50 transition-all bg-gray-50 group">
                                 {uploadando ? (
                                     <div className="flex flex-col items-center gap-3">
                                         <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#CC0000]" />
-                                        <span className="text-xs font-black text-[#CC0000] uppercase tracking-widest">Enviando Blocos...</span>
+                                        <span className="text-xs font-black text-[#CC0000] uppercase tracking-widest">Compilando Vídeo...</span>
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-center gap-3 text-center">
-                                        <div className="p-3 bg-white rounded-full border border-gray-100 shadow-sm group-hover:bg-[#CC0000] group-hover:text-white group-hover:border-[#CC0000] transition-colors text-gray-400">
-                                            <Upload className="h-6 w-6" />
+                                    <div className="flex flex-col items-center gap-4 text-center p-6">
+                                        <div className="p-4 bg-white rounded-full border border-gray-100 shadow-sm group-hover:bg-[#CC0000] group-hover:text-white group-hover:border-[#CC0000] transition-colors text-gray-400">
+                                            <Upload className="h-8 w-8" />
                                         </div>
                                         <div>
-                                            <span className="block text-sm font-black text-gray-900">Arraste a Arte ou Tire Foto</span>
-                                            <span className="block text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">JPG, PNG, WebP · Máscara Vertical Preferível</span>
+                                            <span className="block text-sm font-black text-gray-900">Selecionar arquivo de vídeo</span>
+                                            <span className="block text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">MP4 ou MOV • Landscape(Deitado) Preferível</span>
                                         </div>
                                     </div>
                                 )}
-                                <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploadando} />
+                                <input type="file" accept="video/mp4,video/quicktime" className="hidden" onChange={handleUpload} disabled={uploadando} />
                             </label>
-                        )}
-                        {previewUrl && (
-                            <div className="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-xl">
-                                <span className="text-xs font-bold text-gray-500 uppercase flex items-center gap-2"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> Mídia Alocada no Cache</span>
-                                <button onClick={() => { setPreviewUrl(null); setImagemUrl('') }} className="text-[10px] font-black uppercase text-red-500 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md border border-red-200 transition-colors">Destruir / Refazer</button>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Legenda */}
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex justify-between items-end">
-                            Sobreposição de Texto
-                            <span className={`text-[10px] font-bold ${legenda.length > 130 ? 'text-red-500' : 'text-gray-300'}`}>{legenda.length}/150 char</span>
-                        </label>
-                        <textarea
-                            value={legenda}
-                            onChange={e => setLegenda(e.target.value)}
-                            placeholder="Exemplo para engajar a glória: Quem veio, treinou pra frente! 🥊🔥"
-                            rows={3}
-                            maxLength={150}
-                            className="w-full p-4 text-sm font-medium border border-gray-200 bg-gray-50/50 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-all focus:bg-white"
-                        />
-                    </div>
-
-                    {/* Timers */}
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Timer de Exibição Pública (TTL)</label>
-                        <div className="grid grid-cols-4 gap-2">
-                            {[
-                                { value: '6', label: '6h' },
-                                { value: '12', label: '12h' },
-                                { value: '24', label: '24H MAX' },
-                                { value: '48', label: '48h EXT' },
-                            ].map(opt => (
+                        ) : (
+                            <div className="aspect-[4/3] bg-black rounded-2xl overflow-hidden shadow-lg relative border border-gray-200 group">
+                                <video src={videoUrl} controls className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" />
                                 <button
-                                    key={opt.value}
-                                    type="button"
-                                    onClick={() => setDuracaoHoras(opt.value)}
-                                    className={`
-                      py-3 text-[10px] font-black uppercase tracking-widest rounded-xl border-2 transition-all cursor-pointer
-                      ${duracaoHoras === opt.value
-                                            ? 'border-gray-900 bg-gray-900 text-white shadow-sm'
-                                            : 'border-gray-100 text-gray-400 bg-gray-50 hover:bg-gray-100'}
-                    `}
+                                    onClick={() => setVideoUrl('')}
+                                    className="absolute top-3 right-3 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded shadow-sm hover:bg-red-500 transition-colors z-20"
                                 >
-                                    {opt.label}
+                                    Remover
                                 </button>
-                            ))}
-                        </div>
-                    </div>
-
-                </div>
-
-                {/* Lado Direito - Mockup Device Premium */}
-                <div className="flex flex-col items-center justify-start sticky top-8">
-                    <div className="w-full flex justify-between items-end mb-4">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#CC0000] bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" /> Live Preview
-                        </span>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Escala Original 9:16</span>
-                    </div>
-
-                    <div className="w-[320px] sm:w-[350px] aspect-[9/16] bg-black rounded-[40px] border-[8px] border-gray-900 shadow-2xl relative overflow-hidden ring-1 ring-gray-900/10">
-                        {/* O entalhe / island do celular fake */}
-                        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 rounded-b-xl z-30" />
-
-                        <div className="absolute top-4 left-4 right-4 z-20 flex justify-between items-center px-2">
-                            <div className="flex gap-1.5">
-                                <div className="w-8 h-1 bg-white/40 rounded-full shrink-0" />
-                                <div className="w-8 h-1 bg-white/40 rounded-full shrink-0" />
                             </div>
-                            <span className="text-[10px] font-black text-white/50 tracking-widest drop-shadow-md">X</span>
-                        </div>
-
-                        <div className="w-full h-full bg-gray-800 relative">
-                            {previewUrl ? (
-                                <img src={previewUrl} alt="Preview arte" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-gray-700">
-                                    <MonitorSmartphone className="h-12 w-12 mb-2 opacity-50" />
-                                    <p className="text-xs font-black uppercase tracking-widest opacity-30">Tela Cega</p>
-                                </div>
-                            )}
-
-                            {/* Overlay do Gradient Sempre (Para texto não sumir) */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/30 pointer-events-none" />
-
-                            {legenda && (
-                                <div className="absolute bottom-16 left-6 right-6 z-20 pointer-events-none">
-                                    <p className="text-white text-sm sm:text-base font-semibold drop-shadow-lg leading-snug">
-                                        {legenda}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Footer Fake do Celular (Interação Usuario) */}
-                            <div className="absolute bottom-6 left-6 right-6 z-20 flex items-center gap-3">
-                                <div className="flex-1 h-10 border border-white/20 bg-white/10 backdrop-blur-md rounded-full px-4 flex items-center text-[10px] text-white/40 font-black uppercase tracking-widest">
-                                    Reagir (Fake)...
-                                </div>
-                            </div>
-                        </div>
+                        )}
                     </div>
 
-                    <div className="w-[320px] sm:w-[350px] mt-6 flex gap-3">
-                        <button onClick={() => router.back()} className="flex-1 py-3.5 text-xs font-black text-gray-500 uppercase tracking-widest bg-white border border-gray-200 hover:border-gray-300 hover:text-gray-800 rounded-xl transition-all">
-                            Cancelar
-                        </button>
+                    <div className="pt-6">
                         <button
-                            onClick={handlePublicar}
-                            disabled={salvando || uploadando || (!imagemUrl && !legenda.trim())}
-                            className="flex-[2] py-3.5 text-sm font-black text-white uppercase tracking-widest bg-gray-900 hover:bg-black disabled:opacity-50 disabled:bg-gray-800 rounded-xl transition-all shadow-md active:scale-[0.98]"
+                            onClick={handleSalvar}
+                            disabled={salvando || uploadando || !videoUrl || !titulo}
+                            className="w-full py-4 text-sm font-black text-white uppercase tracking-widest bg-gray-900 hover:bg-black disabled:opacity-50 disabled:bg-gray-800 rounded-xl transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2"
                         >
-                            {salvando ? 'Salvando...' : 'Carregar na Nuvem'}
+                            {salvando ? <LoadingSpinner size="sm" /> : 'Arquivar Publicamente'}
                         </button>
                     </div>
                 </div>

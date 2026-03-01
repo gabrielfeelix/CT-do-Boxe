@@ -17,7 +17,7 @@ const pageTitles: Record<string, string> = {
     '/aulas/series': 'Series de Aulas',
     '/presenca': 'Presença',
     '/feed': 'Feed',
-    '/stories': 'Stories',
+    '/stories': 'Trilhas & Vídeos',
     '/avaliacoes': 'Avaliações',
     '/timer': 'Timer de Rounds',
     '/relatorios': 'Relatórios',
