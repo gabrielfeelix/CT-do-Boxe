@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Upload, Video as VideoIcon, Layers, FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -18,9 +18,20 @@ export default function NovoVideoTrilhaPage() {
     const [videoUrl, setVideoUrl] = useState('')
     const [ordem, setOrdem] = useState(0)
     const [salvando, setSalvando] = useState(false)
+    const [dbCategorias, setDbCategorias] = useState<{ id: string, nome: string }[]>([])
 
     // Upload Supabase Storage
     const [uploadando, setUploadando] = useState(false)
+
+
+
+    useEffect(() => {
+        async function fetchCats() {
+            const { data } = await supabase.from('trilhas_categorias').select('id, nome').eq('ativo', true).order('ordem', { ascending: true })
+            if (data) setDbCategorias(data)
+        }
+        fetchCats()
+    }, [])
 
     async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
@@ -57,19 +68,33 @@ export default function NovoVideoTrilhaPage() {
     }
 
     async function handleSalvar() {
-        const catFinal = categoria === 'nova' ? novaCategoria.trim() : categoria
-
-        if (!videoUrl || !titulo.trim() || !catFinal) {
+        if (!videoUrl || !titulo.trim() || (!categoria && !novaCategoria.trim())) {
             toast.error('Preencha os dados obrigatórios: Título, Categoria e Vídeo.')
             return
         }
 
         setSalvando(true)
+        let finalCatId = categoria
+
+        // Se escolheu 'nova', cria a categoria primeiro
+        if (categoria === 'nova') {
+            const { data: newCat, error: errCat } = await supabase.from('trilhas_categorias').insert({
+                nome: novaCategoria.trim(),
+                ativo: true
+            }).select('id').single()
+
+            if (errCat || !newCat) {
+                toast.error('Erro ao registrar nova categoria de módulo.')
+                setSalvando(false)
+                return
+            }
+            finalCatId = newCat.id
+        }
 
         const { error } = await supabase.from('trilhas_videos').insert({
             titulo: titulo.trim(),
             descricao: descricao.trim() || null,
-            categoria: catFinal,
+            categoria_id: finalCatId, // Relacao ForeignKey
             video_url: videoUrl,
             ordem: ordem,
             ativo: true,
@@ -139,9 +164,9 @@ export default function NovoVideoTrilhaPage() {
                             className="w-full p-4 text-sm font-bold text-gray-900 border border-gray-200 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-all shadow-sm appearance-none mb-3"
                         >
                             <option value="">Selecione um Módulo</option>
-                            <option value="Equipamentos e Manuseio">Equipamentos e Manuseio</option>
-                            <option value="Postura e Base">Postura e Base</option>
-                            <option value="Fundamentos de Combate">Fundamentos de Combate</option>
+                            {dbCategorias.map(cat => (
+                                <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                            ))}
                             <option value="nova">+ Criar Novo Módulo</option>
                         </select>
 
