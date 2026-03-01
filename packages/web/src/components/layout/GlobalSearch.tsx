@@ -149,7 +149,7 @@ export function GlobalSearch() {
                         setOpen(true)
                     }}
                     onFocus={() => setOpen(true)}
-                    placeholder="Buscar (Cmd+K)"
+                    placeholder="Busque por ID, nome, contrato, etc. (Cmd+K)"
                     className="w-full h-10 pl-9 pr-10 text-sm bg-gray-50/80 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-all font-medium text-gray-800 placeholder:text-gray-400 shadow-sm"
                 />
                 {loading && (
