@@ -59,7 +59,10 @@ export default function CandidatoDetalhePage() {
             return
         }
 
-        toast.success(`✅ Operação Ouro Verde: ${candidato?.nome} aprovado e cadastrado no pool do Supabase!`)
+        toast.success(`Candidato aprovado! Conta criada com sucesso.`)
+        if (data.data_avaliacao) {
+            toast.info(`Avaliação física agendada para ${data.data_avaliacao}. Aluno ficará inativo até ser avaliado.`)
+        }
         setShowAprovar(false)
         refetch()
         setProcessando(false)
@@ -80,7 +83,7 @@ export default function CandidatoDetalhePage() {
             return
         }
 
-        toast.success('Reprovação registrada nos anais do CT.')
+        toast.success('Candidato reprovado.')
         setShowReprovar(false)
         refetch()
         setProcessando(false)
@@ -93,8 +96,8 @@ export default function CandidatoDetalhePage() {
             .from('candidatos')
             .update({ observacoes_internas: obsInternas })
             .eq('id', candidato.id)
-        if (error) toast.error('Falha de escrita na matriz.')
-        else toast.success('Adendos sincronizados!')
+        if (error) toast.error('Erro ao salvar observações.')
+        else toast.success('Observações salvas!')
         setSalvandoObs(false)
     }
 
@@ -105,7 +108,7 @@ export default function CandidatoDetalhePage() {
         window.open(`https://wa.me/55${numero}?text=${msg}`, '_blank')
     }
 
-    if (loading) return <div className="pt-20"><LoadingSpinner label="Buscando dossiê do aplicante na matriz Supabase..." /></div>
+    if (loading) return <div className="pt-20"><LoadingSpinner label="Carregando dados do candidato..." /></div>
     if (!candidato) return <div className="text-center py-20 text-gray-500 font-bold uppercase tracking-widest text-sm">Registro de Candidatura Inexistente.</div>
 
     const isPendente = candidato.status === 'aguardando'
@@ -118,7 +121,7 @@ export default function CandidatoDetalhePage() {
                 <div className="bg-white border border-gray-200 p-1.5 rounded-md group-hover:border-gray-300 transition-colors shadow-sm">
                     <ArrowLeft className="h-4 w-4" />
                 </div>
-                Banca de Candidatos
+                Candidatos
             </button>
 
             {/* Hero Header Estilo Passaporte */}
@@ -178,12 +181,20 @@ export default function CandidatoDetalhePage() {
                         </>
                     )}
                     {isAprovado && candidato.aluno_id && (
-                        <Link
-                            href={`/alunos/${candidato.aluno_id}`}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-gray-900 hover:bg-black rounded-xl transition-colors shadow-sm ml-auto"
-                        >
-                            Acessar Ficha do Aluno Mapeado →
-                        </Link>
+                        <>
+                            <Link
+                                href={`/alunos/${candidato.aluno_id}`}
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-gray-900 hover:bg-black rounded-xl transition-colors shadow-sm cursor-pointer"
+                            >
+                                Ver ficha do aluno
+                            </Link>
+                            <Link
+                                href="/avaliacoes"
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/60 rounded-xl transition-colors shadow-sm cursor-pointer"
+                            >
+                                Aguardando avaliação física
+                            </Link>
+                        </>
                     )}
                 </div>
             </div>
@@ -194,9 +205,9 @@ export default function CandidatoDetalhePage() {
                     <div className="absolute top-0 right-0 w-48 h-48 bg-green-400 blur-[80px] opacity-20 pointer-events-none" />
 
                     <div className="relative z-10">
-                        <h3 className="text-xl font-black text-green-900 tracking-tight flex items-center gap-2 mb-1"><ShieldCheck className="w-5 h-5" /> Aprovação Sistêmica Requerida</h3>
+                        <h3 className="text-xl font-black text-green-900 tracking-tight flex items-center gap-2 mb-1"><ShieldCheck className="w-5 h-5" /> Aprovar candidato</h3>
                         <p className="text-sm font-medium text-green-800/80 leading-relaxed max-w-xl">
-                            Isto fará a conexão com a Auth Layer do Supabase, provisionará um novo usuário e gérará os acessos necessários do app para {candidato.nome}.
+                            Ao aprovar, uma conta será criada para {candidato.nome} com acesso ao app.
                         </p>
                     </div>
 
@@ -221,10 +232,10 @@ export default function CandidatoDetalhePage() {
 
                     <div className="flex gap-3 relative z-10 pt-2">
                         <button onClick={() => setShowAprovar(false)} className="px-5 py-3 text-sm font-bold text-green-800 bg-white border border-green-200 rounded-xl hover:bg-green-100 shadow-sm transition-colors">
-                            Abortar Emissão
+                            Cancelar
                         </button>
                         <button onClick={handleAprovar} disabled={processando} className="px-6 py-3 text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60 rounded-xl shadow-md transition-colors flex items-center gap-2">
-                            {processando ? <><LoadingSpinner size="sm" /> Provisionando Cloud...</> : 'Emitir Passaporte Oficial'}
+                            {processando ? <><LoadingSpinner size="sm" /> Criando conta...</> : 'Confirmar aprovação'}
                         </button>
                     </div>
                 </div>
@@ -257,7 +268,7 @@ export default function CandidatoDetalhePage() {
                             Cancelar e Repensar
                         </button>
                         <button onClick={handleReprovar} disabled={processando} className="px-6 py-3 text-sm font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-60 rounded-xl shadow-md transition-colors flex items-center gap-2">
-                            {processando ? <><LoadingSpinner size="sm" /> Selando Destino...</> : 'Confirmar Reprovação Total'}
+                            {processando ? <><LoadingSpinner size="sm" /> Processando...</> : 'Confirmar reprovação'}
                         </button>
                     </div>
                 </div>
@@ -268,14 +279,14 @@ export default function CandidatoDetalhePage() {
                 {/* Main Info */}
                 <div className="md:col-span-3 space-y-6">
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8">
-                        <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 pb-3 flex items-center gap-2"><User className="w-4 h-4" /> Raio-X Submetido pelo Formulário</h3>
+                        <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 pb-3 flex items-center gap-2"><User className="w-4 h-4" /> Dados da inscrição</h3>
 
                         <div className="space-y-6">
                             {[
                                 { label: 'Data de Nascimento', value: candidato.data_nascimento ? formatDate(candidato.data_nascimento) : '—' },
                                 { label: 'Level Desportivo', value: EXPERIENCIA_LABELS[candidato.experiencia_previa ?? ''] ?? '—' },
-                                { label: 'Canal de Aquisição (Onde conheceu)', value: candidato.como_conheceu ?? '—' },
-                                { label: 'Engrenagem Horária Disponível', value: candidato.disponibilidade ?? '—' },
+                                { label: 'Como conheceu o CT', value: candidato.como_conheceu ?? '—' },
+                                { label: 'Disponibilidade', value: candidato.disponibilidade ?? '—' },
                             ].map(campo => (
                                 <div key={campo.label} className="flex justify-between items-center bg-gray-50/50 p-4 rounded-xl border border-gray-100">
                                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">{campo.label}</p>
@@ -286,7 +297,7 @@ export default function CandidatoDetalhePage() {
 
                         {candidato.motivacao && (
                             <div className="mt-6 pt-6 border-t border-gray-100">
-                                <p className="text-[10px] font-black text-[#CC0000] uppercase tracking-widest mb-3 bg-red-50 w-fit px-2 py-1 rounded">Carta de Motivação / Objetivo</p>
+                                <p className="text-[10px] font-black text-[#CC0000] uppercase tracking-widest mb-3 bg-red-50 w-fit px-2 py-1 rounded">Motivação</p>
                                 <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200/60 shadow-inner">
                                     <p className="text-sm font-medium text-gray-700 leading-relaxed italic border-l-2 border-[#CC0000] pl-4">{candidato.motivacao}</p>
                                 </div>
@@ -296,7 +307,7 @@ export default function CandidatoDetalhePage() {
                         {candidato.tem_condicao_medica && candidato.descricao_condicao && (
                             <div className="mt-6 pt-6 border-t border-gray-100">
                                 <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-2xl p-5 border border-yellow-200 shadow-sm">
-                                    <p className="text-xs font-black text-yellow-800 uppercase tracking-widest mb-2 flex items-center gap-1.5">⚠️ Preâmbulo Médico Assumido</p>
+                                    <p className="text-xs font-black text-yellow-800 uppercase tracking-widest mb-2 flex items-center gap-1.5">Condição médica informada</p>
                                     <p className="text-sm font-bold text-yellow-900">{candidato.descricao_condicao}</p>
                                 </div>
                             </div>
@@ -310,8 +321,8 @@ export default function CandidatoDetalhePage() {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-gray-700 blur-[80px] opacity-30 pointer-events-none" />
 
                         <div className="relative z-10 flex-1">
-                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><Save className="w-4 h-4" /> Diário do Mestre</h3>
-                            <p className="text-xs font-bold text-gray-500 mb-5 pb-4 border-b border-gray-800 leading-relaxed">Bloco de notas local, invisível aos atletas. Bom para anotações de contato ou observações internas.</p>
+                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><Save className="w-4 h-4" /> Observações internas</h3>
+                            <p className="text-xs font-bold text-gray-500 mb-5 pb-4 border-b border-gray-800 leading-relaxed">Notas visíveis apenas para o professor.</p>
 
                             <textarea
                                 value={obsInternas || candidato.observacoes_internas || ''}
@@ -327,7 +338,7 @@ export default function CandidatoDetalhePage() {
                             disabled={salvandoObs || obsInternas === candidato.observacoes_internas}
                             className="mt-6 w-full py-3.5 text-sm font-bold text-white bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:bg-gray-800 rounded-xl shadow-sm transition-all flex justify-center items-center gap-2 relative z-10"
                         >
-                            {salvandoObs ? <><LoadingSpinner size="sm" /> Escrevendo...</> : 'Persistir Comentários'}
+                            {salvandoObs ? <><LoadingSpinner size="sm" /> Salvando...</> : 'Salvar observações'}
                         </button>
                     </div>
                 </div>

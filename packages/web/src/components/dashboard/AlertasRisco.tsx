@@ -45,8 +45,8 @@ async function getAlertas(): Promise<AlertaItem[]> {
     if ((avaliacoesPendentes.count ?? 0) > 0) {
         alertas.push({
             id: 'avaliacoes',
-            mensagem: `${avaliacoesPendentes.count} avaliacao(oes) fisica(s) pendente(s).`,
-            acao: 'Ver avaliacoes',
+            mensagem: `${avaliacoesPendentes.count} avaliação(ões) física(s) pendente(s).`,
+            acao: 'Ver avaliações',
             href: '/avaliacoes',
             color: 'text-blue-600 bg-blue-50 border-blue-100',
             icon: ClipboardList,
@@ -56,8 +56,8 @@ async function getAlertas(): Promise<AlertaItem[]> {
     if ((pagamentosAtrasados.count ?? 0) > 0) {
         alertas.push({
             id: 'financeiro',
-            mensagem: `${pagamentosAtrasados.count} pagamento(s) vencido(s) ha mais de 7 dias.`,
-            acao: 'Ver inadimplencia',
+            mensagem: `${pagamentosAtrasados.count} pagamento(s) vencido(s) há mais de 7 dias.`,
+            acao: 'Ver inadimplência',
             href: '/financeiro/inadimplencia',
             color: 'text-red-600 bg-red-50 border-red-100',
             icon: AlertTriangle,
@@ -67,7 +67,7 @@ async function getAlertas(): Promise<AlertaItem[]> {
     if ((contratosVencendo.count ?? 0) > 0) {
         alertas.push({
             id: 'contratos',
-            mensagem: `${contratosVencendo.count} contrato(s) vencendo nos proximos dias.`,
+            mensagem: `${contratosVencendo.count} contrato(s) vencendo nos próximos dias.`,
             acao: 'Ver contratos',
             href: '/contratos',
             color: 'text-amber-600 bg-amber-50 border-amber-100',
@@ -78,7 +78,7 @@ async function getAlertas(): Promise<AlertaItem[]> {
     if (alunosEmRisco > 0) {
         alertas.push({
             id: 'risco',
-            mensagem: `${alunosEmRisco} aluno(s) sem treinar ha 10 dias ou mais.`,
+            mensagem: `${alunosEmRisco} aluno(s) sem treinar há 10 dias ou mais.`,
             acao: 'Ver alunos',
             href: '/alunos',
             color: 'text-indigo-600 bg-indigo-50 border-indigo-100',
@@ -95,13 +95,13 @@ export async function AlertasRisco() {
     return (
         <div className="flex h-full flex-col rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md">
             <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">Alertas prioritarios</h3>
+                <h3 className="text-sm font-semibold text-gray-900">Alertas prioritários</h3>
                 <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-red-600">{alertas.length}</span>
             </div>
 
             {alertas.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3 text-sm font-medium text-gray-500">
-                    Nenhum alerta critico no momento.
+                    Nenhum alerta crítico no momento.
                 </p>
             ) : (
                 <div className="flex flex-1 flex-col gap-3">

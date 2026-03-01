@@ -38,7 +38,7 @@ export default function StoriesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
                 <div>
                     <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                        <PlaySquare className="w-6 h-6 text-[#CC0000]" /> Stories Activos
+                        <PlaySquare className="w-6 h-6 text-[#CC0000]" /> Stories Ativos
                     </h2>
                     <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">
                         {loading ? 'Calculando ciclo de vida...' : `Painel de controle rotativo • ${stories.length} no ar`}

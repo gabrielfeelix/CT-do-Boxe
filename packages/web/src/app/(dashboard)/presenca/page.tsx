@@ -33,7 +33,7 @@ export default function PresencaPage() {
     return (
         <div className="mx-auto max-w-[1440px] space-y-6 pb-8">
             <header className="border-b border-gray-100 pb-5">
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900">Presenca</h2>
+                <h2 className="text-2xl font-bold tracking-tight text-gray-900">Presença</h2>
                 <p className="mt-1 text-sm font-medium text-gray-500">
                     Abra uma aula para registrar chamada e realizar check-ins manuais.
                 </p>
@@ -46,8 +46,8 @@ export default function PresencaPage() {
             ) : proximasAulas.length === 0 ? (
                 <EmptyState
                     icon={CalendarCheck2}
-                    title="Nenhuma aula agendada para os proximos dias"
-                    description="Cadastre uma aula para iniciar a chamada de presenca."
+                    title="Nenhuma aula agendada para os próximos dias"
+                    description="Cadastre uma aula para iniciar a chamada de presença."
                 />
             ) : (
                 <div className="grid gap-4 md:grid-cols-2">
@@ -63,11 +63,11 @@ export default function PresencaPage() {
 
                             <div className="space-y-1 text-sm font-medium text-gray-600">
                                 <p>
-                                    Horario: {aula.hora_inicio.slice(0, 5)} - {aula.hora_fim.slice(0, 5)}
+                                    Horário: {aula.hora_inicio.slice(0, 5)} - {aula.hora_fim.slice(0, 5)}
                                 </p>
                                 <p>Professor: {aula.professor}</p>
                                 <p>
-                                    Confirmacoes: {aula.total_agendados}/{aula.capacidade_maxima}
+                                    Confirmações: {aula.total_agendados}/{aula.capacidade_maxima}
                                 </p>
                             </div>
 

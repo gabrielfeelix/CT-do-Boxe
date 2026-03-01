@@ -48,7 +48,7 @@ export function ReceitaChart({ data }: ReceitaChartProps) {
 
             {!hasData ? (
                 <div className="flex h-[240px] items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm font-medium text-gray-500">
-                    Sem movimentacao financeira nos ultimos 6 meses.
+                    Sem movimentação financeira nos últimos 6 meses.
                 </div>
             ) : (
                 <ResponsiveContainer width="100%" height={240}>

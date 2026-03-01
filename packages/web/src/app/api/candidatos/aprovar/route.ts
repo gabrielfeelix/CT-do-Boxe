@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
                 email: candidato.email,
                 telefone: candidato.telefone,
                 data_nascimento: candidato.data_nascimento,
-                status: 'ativo',
+                status: 'inativo',
             })
             .select()
             .single()
@@ -80,10 +80,24 @@ export async function POST(req: NextRequest) {
 
         if (erroUpdate) throw erroUpdate
 
+        // 4. Cria avaliação física de entrada agendada para +3 dias
+        const dataAvaliacao = new Date()
+        dataAvaliacao.setDate(dataAvaliacao.getDate() + 3)
+        const dataAvaliacaoISO = dataAvaliacao.toISOString().slice(0, 10)
+
+        await supabaseAdmin.from('avaliacoes').insert({
+            aluno_id: novoAluno.id,
+            tipo: 'entrada',
+            status: 'agendada',
+            data_avaliacao: dataAvaliacaoISO,
+            resultado: 'pendente',
+        })
+
         return NextResponse.json({
             sucesso: true,
             aluno_id: novoAluno.id,
-            mensagem: `Conta criada para ${candidato.nome}. Senha temporária enviada.`,
+            data_avaliacao: dataAvaliacaoISO,
+            mensagem: `Conta criada para ${candidato.nome}. Aluno inativo até avaliação física em ${dataAvaliacaoISO}.`,
         })
     } catch (err) {
         console.error('Erro ao aprovar candidato:', err)

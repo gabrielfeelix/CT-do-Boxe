@@ -109,7 +109,54 @@ function NovoContratoForm() {
             if (contratoError) throw contratoError
 
             toast.success('Contrato registrado com sucesso!')
-            toast.info('Gere a cobrança no módulo Financeiro quando necessário.')
+
+            // Tenta gerar pagamento PIX automaticamente
+            try {
+                const pgtoResponse = await fetch('/api/pagamentos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        aluno_id: alunoSelecionado.id,
+                        contrato_id: contrato.id,
+                        valor: planoSelecionado.valor,
+                        descricao: `${planoSelecionado.nome} - CT Boxe`,
+                        email_pagador: alunoSelecionado.email,
+                        nome_pagador: alunoSelecionado.nome,
+                    }),
+                })
+
+                if (pgtoResponse.ok) {
+                    const pgtoData = await pgtoResponse.json()
+                    if (pgtoData.pix_copia_cola) {
+                        toast.success('Cobrança PIX gerada! QR code disponível no Financeiro.')
+                    } else {
+                        toast.info('Pagamento registrado como pendente.')
+                    }
+                } else {
+                    // Fallback: cria pagamento pendente manual
+                    await supabase.from('pagamentos').insert({
+                        aluno_id: alunoSelecionado.id,
+                        contrato_id: contrato.id,
+                        valor: planoSelecionado.valor,
+                        status: 'pendente',
+                        metodo: 'pix',
+                        data_vencimento: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
+                    })
+                    toast.info('Cobrança PIX não disponível. Pagamento registrado como pendente.')
+                }
+            } catch {
+                // Fallback: cria pagamento pendente manual
+                await supabase.from('pagamentos').insert({
+                    aluno_id: alunoSelecionado.id,
+                    contrato_id: contrato.id,
+                    valor: planoSelecionado.valor,
+                    status: 'pendente',
+                    metodo: 'pix',
+                    data_vencimento: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
+                })
+                toast.info('Pagamento registrado como pendente.')
+            }
+
             router.push(`/contratos/${contrato.id}`)
         } catch (submitError) {
             console.error(submitError)
@@ -135,7 +182,7 @@ function NovoContratoForm() {
             <header className="space-y-1">
                 <h2 className="text-2xl font-bold tracking-tight text-gray-900">Registrar contrato</h2>
                 <p className="text-sm font-medium text-gray-500">
-                    Vincule um aluno ativo a um plano e gere a cobranca inicial.
+                    Vincule um aluno ativo a um plano e gere a cobrança inicial.
                 </p>
             </header>
 
@@ -207,7 +254,7 @@ function NovoContratoForm() {
                         </div>
                     ) : planos.length === 0 ? (
                         <div className="rounded-lg border border-dashed border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-800">
-                            Nenhum plano ativo encontrado. Cadastre um plano em Configuracoes para continuar.
+                            Nenhum plano ativo encontrado. Cadastre um plano em Configurações para continuar.
                         </div>
                     ) : (
                         <div className="grid gap-3 sm:grid-cols-2">
@@ -235,7 +282,7 @@ function NovoContratoForm() {
 
                 <div className="grid gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 sm:grid-cols-2">
                     <div>
-                        <label className="mb-1.5 block text-sm font-semibold text-gray-700">Inicio de vigencia</label>
+                        <label className="mb-1.5 block text-sm font-semibold text-gray-700">Início de vigência</label>
                         <input
                             type="date"
                             value={dataInicio}
@@ -259,7 +306,7 @@ function NovoContratoForm() {
                             onChange={(event) => setRenovacaoAutomatica(event.target.checked)}
                             className="h-4 w-4 rounded border-gray-300 text-[#CC0000] focus:ring-[#CC0000]/30"
                         />
-                        Renovacao automatica
+                        Renovação automática
                     </label>
                 </div>
 
@@ -270,7 +317,7 @@ function NovoContratoForm() {
                             <li>Aluno: {alunoSelecionado.nome}</li>
                             <li>Plano: {planoSelecionado.nome}</li>
                             <li>
-                                Vigencia: {formatDate(dataInicio)} ate {formatDate(dataFim)}
+                                Vigência: {formatDate(dataInicio)} até {formatDate(dataFim)}
                             </li>
                             <li className="pt-1 text-base font-bold">
                                 Valor: R$ {planoSelecionado.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}

@@ -18,8 +18,8 @@ export default function NovoPostPage() {
     const restantes = limite - conteudo.length
 
     async function handlePublicar() {
-        if (!conteudo.trim()) { toast.error('Impossível atirar no escuro: O texto do comunicado está vazio.'); return }
-        if (conteudo.length > limite) { toast.error(`Atenção: Buffer de caracteres excedido (${limite} máx)`); return }
+        if (!conteudo.trim()) { toast.error('O texto do comunicado está vazio.'); return }
+        if (conteudo.length > limite) { toast.error(`Limite de caracteres excedido (${limite} máx)`); return }
 
         setSalvando(true)
 
@@ -35,7 +35,7 @@ export default function NovoPostPage() {
             return
         }
 
-        toast.success('Puxou o gatilho! O post foi despachado para todos os dispositivos.')
+        toast.success('Comunicado publicado com sucesso!')
         router.push('/feed')
     }
 
@@ -45,14 +45,14 @@ export default function NovoPostPage() {
                 <div className="bg-white border border-gray-200 p-1.5 rounded-md group-hover:border-gray-300 transition-colors shadow-sm">
                     <ArrowLeft className="h-4 w-4" />
                 </div>
-                Roteamento de Feed
+                ← Feed
             </button>
 
             <div>
                 <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2 mb-1">
-                    <PenSquare className="w-6 h-6 text-[#CC0000]" /> Novo Despacho
+                    <PenSquare className="w-6 h-6 text-[#CC0000]" /> Novo comunicado
                 </h2>
-                <p className="text-sm font-bold text-gray-400 tracking-wide uppercase">Transmitir novidades em tempo real para a comunidade do CT.</p>
+                <p className="text-sm font-bold text-gray-400 tracking-wide uppercase">Publique novidades para a comunidade do CT.</p>
             </div>
 
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden relative">
@@ -114,14 +114,14 @@ export default function NovoPostPage() {
                         onClick={() => router.back()}
                         className="flex-1 py-3.5 text-xs font-black text-gray-500 uppercase tracking-widest bg-white border border-gray-200 hover:border-gray-300 hover:text-gray-800 hover:shadow-sm rounded-xl transition-all"
                     >
-                        Abortar Operação
+                        Cancelar
                     </button>
                     <button
                         onClick={handlePublicar}
                         disabled={salvando || !conteudo.trim()}
                         className="flex-[2] py-3.5 text-sm font-black text-white uppercase tracking-widest bg-[#CC0000] hover:bg-[#AA0000] border-[#AA0000] disabled:opacity-50 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                     >
-                        {salvando ? 'Conectando Antenas...' : 'Ejetar Comunicado Agora'}
+                        {salvando ? 'Publicando...' : 'Publicar comunicado'}
                     </button>
                 </div>
             </div>

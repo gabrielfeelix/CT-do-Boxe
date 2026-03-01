@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { Calendar, Clock3, Users, UserCheck, UserX, Ban, MoreHorizontal } from 'lucide-react'
 import { formatDate } from '@/lib/utils/formatters'
@@ -71,6 +72,16 @@ export function AulaCard({ aula, onCancelar }: AulaCardProps) {
     const categoria = categoriaConfig(aula.categoria)
     const tipoAula = tipoAulaConfig(aula.tipo_aula)
     const ocupacao = aula.capacidade_maxima > 0 ? Math.round((aula.total_agendados / aula.capacidade_maxima) * 100) : 0
+    const [menuAberto, setMenuAberto] = useState(false)
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        function handleClickFora(e: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuAberto(false)
+        }
+        if (menuAberto) document.addEventListener('mousedown', handleClickFora)
+        return () => document.removeEventListener('mousedown', handleClickFora)
+    }, [menuAberto])
 
     return (
         <article className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
@@ -109,7 +120,7 @@ export function AulaCard({ aula, onCancelar }: AulaCardProps) {
 
             <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50/70 p-3">
                 <div className="mb-2 flex items-center justify-between text-xs font-semibold text-gray-600">
-                    <span>Ocupacao</span>
+                    <span>Ocupação</span>
                     <span>{aula.total_agendados}/{aula.capacidade_maxima}</span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-gray-200">
@@ -139,26 +150,38 @@ export function AulaCard({ aula, onCancelar }: AulaCardProps) {
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
                 <Link
+                    href={`/presenca/${aula.id}`}
+                    className="inline-flex h-9 items-center rounded-lg bg-[#CC0000] px-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#AA0000] cursor-pointer"
+                >
+                    Lista de presença
+                </Link>
+                <Link
                     href={`/aulas/${aula.id}`}
-                    className="inline-flex h-9 items-center rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900"
+                    className="inline-flex h-9 items-center rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900 cursor-pointer"
                 >
                     Ver detalhes
                 </Link>
-                <Link
-                    href={`/presenca/${aula.id}`}
-                    className="inline-flex h-9 items-center rounded-lg bg-[#CC0000] px-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#AA0000]"
-                >
-                    Lista de presenca
-                </Link>
                 {aula.status === 'agendada' && onCancelar && (
-                    <button
-                        type="button"
-                        className="inline-flex h-9 items-center rounded-lg border border-red-200 bg-red-50 px-3 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100"
-                        onClick={() => onCancelar(aula)}
-                    >
-                        <MoreHorizontal className="mr-1.5 h-3.5 w-3.5" />
-                        Cancelar
-                    </button>
+                    <div className="relative" ref={menuRef}>
+                        <button
+                            type="button"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900 cursor-pointer"
+                            onClick={() => setMenuAberto(prev => !prev)}
+                        >
+                            <MoreHorizontal className="h-4 w-4" />
+                        </button>
+                        {menuAberto && (
+                            <div className="absolute right-0 top-full mt-1 z-20 w-40 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+                                <button
+                                    type="button"
+                                    className="w-full px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50 cursor-pointer"
+                                    onClick={() => { setMenuAberto(false); onCancelar(aula) }}
+                                >
+                                    Cancelar aula
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
         </article>

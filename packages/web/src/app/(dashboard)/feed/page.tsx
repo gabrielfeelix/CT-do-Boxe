@@ -51,17 +51,17 @@ export default function FeedPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
                 <div>
                     <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                        <LayoutTemplate className="w-6 h-6 text-[#CC0000]" /> Mural do CT
+                        <LayoutTemplate className="w-6 h-6 text-[#CC0000]" /> Feed do CT
                     </h2>
                     <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">
-                        {loading ? 'Carregando publicações...' : `${posts.length} comunicado${posts.length !== 1 ? 's' : ''} indexado${posts.length !== 1 ? 's' : ''}`}
+                        {loading ? 'Carregando publicações...' : `Comunicados publicados para os alunos`}
                     </p>
                 </div>
                 <Link
                     href="/feed/novo"
                     className="bg-gray-900 hover:bg-black text-white text-sm font-bold uppercase tracking-widest px-6 py-3 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-2 max-w-fit"
                 >
-                    <PenSquare className="h-4 w-4" /> Publicar Comunicado
+                    <PenSquare className="h-4 w-4" /> + Novo comunicado
                 </Link>
             </div>
 

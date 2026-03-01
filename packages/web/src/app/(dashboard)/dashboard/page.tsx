@@ -160,7 +160,7 @@ export default async function DashboardPage() {
     return (
         <div className="mx-auto max-w-[1440px] space-y-6 pb-8">
             <div className="mb-2 flex flex-col gap-1.5">
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900">Painel de gestao do CT</h2>
+                <h2 className="text-2xl font-bold tracking-tight text-gray-900">Painel de gestão do CT</h2>
                 <p className="text-sm font-medium text-gray-500">Indicadores atualizados com dados reais do sistema.</p>
             </div>
 
@@ -168,9 +168,9 @@ export default async function DashboardPage() {
                 <MetricCard
                     title="Alunos ativos"
                     value={totalAtivos.toString()}
-                    subtitle={`+${novosMes} novos no mes`}
+                    subtitle={`+${novosMes} novos no mês`}
                     icon={Users}
-                    trend={{ value: `${novosMes} neste mes`, positive: true }}
+                    trend={{ value: `${novosMes} neste mês`, positive: true }}
                     variant="default"
                 />
                 <MetricCard
@@ -192,11 +192,11 @@ export default async function DashboardPage() {
                     variant="danger"
                 />
                 <MetricCard
-                    title="Presenca semanal"
+                    title="Presença semanal"
                     value={`${taxaPresenca}%`}
                     subtitle={`${aulasHoje} aula(s) hoje`}
                     icon={CheckSquare}
-                    trend={{ value: `${presencaTrendLabel(taxaPresenca)}`, positive: taxaPresenca >= 70 }}
+                    trend={{ value: `${presencaTrendLabel(taxaPresenca, aulasHoje)}`, positive: taxaPresenca >= 70 || (taxaPresenca === 0 && aulasHoje === 0) }}
                     variant="warning"
                 />
             </div>
@@ -216,9 +216,10 @@ export default async function DashboardPage() {
     )
 }
 
-function presencaTrendLabel(taxa: number) {
-    if (taxa >= 85) return 'aderencia alta'
-    if (taxa >= 70) return 'aderencia estavel'
-    if (taxa >= 50) return 'aderencia em alerta'
-    return 'aderencia baixa'
+function presencaTrendLabel(taxa: number, aulasHoje: number) {
+    if (taxa === 0 && aulasHoje === 0) return 'aguardando dados'
+    if (taxa >= 85) return 'aderência alta'
+    if (taxa >= 70) return 'aderência estável'
+    if (taxa >= 50) return 'aderência em alerta'
+    return 'aderência baixa'
 }

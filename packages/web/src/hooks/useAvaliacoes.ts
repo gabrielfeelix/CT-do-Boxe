@@ -65,3 +65,26 @@ export function useAvaliacoesPendentes() {
 
     return { avaliacoes, loading }
 }
+
+// Lista de avaliações concluídas — para histórico
+export function useAvaliacoesConcluidas() {
+    const [avaliacoes, setAvaliacoes] = useState<Array<Avaliacao & { aluno?: { nome?: string; email?: string; foto_url?: string } }>>([])
+    const [loading, setLoading] = useState(true)
+    const supabase = createClient()
+
+    useEffect(() => {
+        async function fetch() {
+            const { data } = await supabase
+                .from('avaliacoes')
+                .select('*, aluno:alunos(nome, email, foto_url)')
+                .eq('status', 'concluida')
+                .order('data_avaliacao', { ascending: false })
+                .limit(10)
+            setAvaliacoes(data ?? [])
+            setLoading(false)
+        }
+        fetch()
+    }, [])
+
+    return { avaliacoes, loading }
+}
