@@ -1,0 +1,196 @@
+import { Feather, FontAwesome5 } from '@expo/vector-icons'
+import { useCallback, useEffect, useState } from 'react'
+import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+
+import { useAuth } from '@/contexts/AuthContext'
+import { fetchFeedData, toggleFeedLike } from '@/lib/appData'
+import type { FeedPost } from '@/lib/types'
+
+export default function FeedScreen() {
+    const { aluno } = useAuth()
+    const [posts, setPosts] = useState<FeedPost[]>([])
+    const [loading, setLoading] = useState(true)
+    const [refreshing, setRefreshing] = useState(false)
+
+    const loadData = useCallback(async () => {
+        if (!aluno?.id) return
+        const data = await fetchFeedData(aluno.id)
+        setPosts(data)
+        setLoading(false)
+    }, [aluno?.id])
+
+    useEffect(() => {
+        loadData()
+    }, [loadData])
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true)
+        await loadData()
+        setRefreshing(false)
+    }, [loadData])
+
+    const handleLike = async (postId: string) => {
+        if (!aluno?.id) return
+
+        const current = posts.find((post) => post.id === postId)
+        if (!current) return
+
+        const nextLiked = !current.likedByMe
+        const optimisticTotal = current.likedByMe ? current.curtidas - 1 : current.curtidas + 1
+
+        setPosts((prev) =>
+            prev.map((post) =>
+                post.id === postId
+                    ? {
+                          ...post,
+                          likedByMe: nextLiked,
+                          curtidas: Math.max(0, optimisticTotal),
+                      }
+                    : post
+            )
+        )
+
+        const result = await toggleFeedLike(postId, aluno.id, current.likedByMe)
+        setPosts((prev) =>
+            prev.map((post) =>
+                post.id === postId
+                    ? {
+                          ...post,
+                          likedByMe: result.likedByMe,
+                          curtidas: result.curtidas,
+                      }
+                    : post
+            )
+        )
+    }
+
+    const handleComment = () => {
+        Alert.alert(
+            'Comentarios',
+            'Comentarios sao exibidos em tempo real. Publicacao de comentario pelo app sera habilitada na proxima iteracao.'
+        )
+    }
+
+    return (
+        <View className="flex-1 bg-[#FDFDFD]">
+            <View className="z-10 border-b border-slate-100 bg-white px-6 pb-6 pt-16 shadow-sm shadow-slate-200/50">
+                <Text className="mb-1 text-sm font-bold uppercase tracking-widest text-slate-500">Mural do CT</Text>
+                <Text className="text-4xl font-black tracking-tight text-slate-900">Feed</Text>
+            </View>
+
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 100 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            >
+                {loading ? (
+                    <View className="px-6 py-16">
+                        <Text className="text-center text-sm text-slate-500">Carregando posts...</Text>
+                    </View>
+                ) : posts.length === 0 ? (
+                    <View className="px-6 py-20 items-center">
+                        <Feather name="inbox" size={48} color="#CBD5E1" />
+                        <Text className="mt-4 text-slate-500">Nenhum post publicado.</Text>
+                    </View>
+                ) : (
+                    <View className="pt-6">
+                        {posts.map((post) => (
+                            <View
+                                key={post.id}
+                                className="mb-6 border-y border-slate-100 bg-white px-6 py-5 shadow-sm shadow-slate-200/30"
+                            >
+                                <View className="mb-4 flex-row items-center">
+                                    <View className="mr-3 h-12 w-12 items-center justify-center rounded-full border-2 border-slate-100 bg-slate-800 shadow-sm">
+                                        <Text className="text-lg font-black tracking-tighter text-white">
+                                            {post.iniciais}
+                                        </Text>
+                                    </View>
+                                    <View>
+                                        <Text className="text-base font-bold tracking-tight text-slate-900">
+                                            {post.autor}
+                                        </Text>
+                                        <Text className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                            {post.data}
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                <Text className="mb-4 text-[15px] font-medium leading-relaxed text-slate-700">
+                                    {post.texto}
+                                </Text>
+
+                                {post.imagem ? (
+                                    <View className="mb-4 h-48 w-full items-center justify-center rounded-2xl border border-slate-200 bg-slate-100">
+                                        <Feather name="image" size={32} color="#CBD5E1" />
+                                        <Text className="mt-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                                            Midia anexada
+                                        </Text>
+                                    </View>
+                                ) : null}
+
+                                <View className="mt-1 flex-row items-center space-x-6 border-t border-slate-50 pt-2">
+                                    <TouchableOpacity
+                                        activeOpacity={0.6}
+                                        onPress={() => handleLike(post.id)}
+                                        className="flex-row items-center py-2"
+                                    >
+                                        <View
+                                            className={`relative mr-2 h-10 w-10 items-center justify-center rounded-full ${
+                                                post.likedByMe ? 'bg-red-50' : 'bg-slate-50'
+                                            }`}
+                                        >
+                                            <FontAwesome5
+                                                name="fire"
+                                                size={18}
+                                                color={post.likedByMe ? '#CC0000' : '#94A3B8'}
+                                                solid={post.likedByMe}
+                                            />
+                                        </View>
+                                        <Text
+                                            className={`font-bold ${
+                                                post.likedByMe ? 'text-[#CC0000]' : 'text-slate-500'
+                                            }`}
+                                        >
+                                            {post.curtidas} {post.curtidas === 1 ? 'curtida' : 'curtidas'}
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        activeOpacity={0.6}
+                                        onPress={handleComment}
+                                        className="flex-row items-center py-2"
+                                    >
+                                        <View className="mr-2 h-10 w-10 items-center justify-center rounded-full bg-slate-50">
+                                            <Feather name="message-circle" size={18} color="#64748B" />
+                                        </View>
+                                        <Text className="font-bold text-slate-500">
+                                            {post.comentarios.length}
+                                            <Text className="font-medium">
+                                                {' '}
+                                                {post.comentarios.length === 1 ? 'comentario' : 'comentarios'}
+                                            </Text>
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                {post.comentarios.length > 0 && (
+                                    <View className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                                        <View className="flex-row items-start">
+                                            <Text className="mr-2 text-xs font-bold text-slate-900">
+                                                {post.comentarios[0].autor}
+                                            </Text>
+                                            <Text className="flex-1 flex-wrap text-xs font-medium text-slate-600">
+                                                {post.comentarios[0].texto}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                )}
+                            </View>
+                        ))}
+                    </View>
+                )}
+            </ScrollView>
+        </View>
+    )
+}
+

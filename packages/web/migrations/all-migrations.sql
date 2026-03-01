@@ -1,0 +1,70 @@
+-- ============================================
+-- MIGRATIONS CONSOLIDADAS - CT BOXE
+-- Data: 2026-02-28
+-- ============================================
+
+-- ============================================
+-- 001: Adicionar categorização às aulas
+-- ============================================
+
+ALTER TABLE aulas
+ADD COLUMN IF NOT EXISTS categoria TEXT DEFAULT 'todos'
+  CHECK (categoria IN ('infantil', 'adulto', 'todos'));
+
+ALTER TABLE aulas
+ADD COLUMN IF NOT EXISTS tipo_aula TEXT DEFAULT 'grupo'
+  CHECK (tipo_aula IN ('grupo', 'individual'));
+
+ALTER TABLE aulas
+ADD COLUMN IF NOT EXISTS serie_id UUID DEFAULT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_aulas_serie ON aulas(serie_id);
+CREATE INDEX IF NOT EXISTS idx_aulas_categoria ON aulas(categoria);
+CREATE INDEX IF NOT EXISTS idx_aulas_tipo ON aulas(tipo_aula);
+
+-- ============================================
+-- 002: Adicionar renovação automática aos planos
+-- ============================================
+
+ALTER TABLE planos
+ADD COLUMN IF NOT EXISTS recorrencia_automatica BOOLEAN DEFAULT false;
+
+ALTER TABLE planos
+ADD COLUMN IF NOT EXISTS tipo_acesso TEXT DEFAULT 'grupo'
+  CHECK (tipo_acesso IN ('grupo', 'individual'));
+
+ALTER TABLE planos
+ADD COLUMN IF NOT EXISTS mercadopago_plan_id TEXT DEFAULT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_planos_tipo_acesso ON planos(tipo_acesso);
+CREATE INDEX IF NOT EXISTS idx_planos_recorrentes ON planos(recorrencia_automatica) WHERE recorrencia_automatica = true;
+
+-- ============================================
+-- 003: Criar tabela series_aulas
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS series_aulas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  titulo TEXT NOT NULL DEFAULT 'Aula de Boxe',
+  dia_semana INTEGER NOT NULL CHECK (dia_semana BETWEEN 0 AND 6),
+  hora_inicio TIME NOT NULL,
+  hora_fim TIME NOT NULL,
+  categoria TEXT NOT NULL CHECK (categoria IN ('infantil', 'adulto', 'todos')),
+  tipo_aula TEXT NOT NULL CHECK (tipo_aula IN ('grupo', 'individual')),
+  professor TEXT DEFAULT 'Argel Riboli',
+  capacidade_maxima INTEGER DEFAULT 16 CHECK (capacidade_maxima > 0),
+  ativo BOOLEAN DEFAULT true,
+  data_inicio DATE NOT NULL,
+  data_fim DATE DEFAULT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_series_dia_semana ON series_aulas(dia_semana);
+CREATE INDEX IF NOT EXISTS idx_series_ativo ON series_aulas(ativo) WHERE ativo = true;
+CREATE INDEX IF NOT EXISTS idx_series_categoria ON series_aulas(categoria);
+CREATE INDEX IF NOT EXISTS idx_series_tipo ON series_aulas(tipo_aula);
+
+-- ============================================
+-- FIM DAS MIGRATIONS
+-- ============================================

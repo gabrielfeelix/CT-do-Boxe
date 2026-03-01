@@ -1,0 +1,51 @@
+﻿
+> ct-boxe-web@0.1.0 lint
+> eslint
+
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\contratos\[id]\page.tsx
+    5:92  warning  'FileText' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   10:22  warning  'formatCurrency' is defined but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  228:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\feed\page.tsx
+  93:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\financeiro\inadimplencia\page.tsx
+  21:15  warning  'diasAtraso' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\stories\novo\page.tsx
+    5:29  warning  'X' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+  206:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\stories\page.tsx
+  94:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\timer\page.tsx
+  71:17  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\components\layout\Header.tsx
+  3:16  warning  'Search' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\components\shared\AvatarInitials.tsx
+  38:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useAlunos.ts
+  1:1  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useAvaliacoes.ts
+   1:1   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  48:50  error    Unexpected any. Specify a different type                                                            @typescript-eslint/no-explicit-any
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useCandidatos.ts
+  1:1  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useFeed.ts
+  1:1  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useFinanceiro.ts
+  1:1  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+Ô£û 17 problems (1 error, 16 warnings)
+  0 errors and 6 warnings potentially fixable with the `--fix` option.
+

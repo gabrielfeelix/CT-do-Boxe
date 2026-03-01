@@ -1,0 +1,221 @@
+﻿
+> ct-boxe-web@0.1.0 lint
+> eslint
+
+
+D:\Sistema-ct-boxe\ct-boxe-web\create_tables.cjs
+  1:20  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+D:\Sistema-ct-boxe\ct-boxe-web\reload.cjs
+  1:20  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+D:\Sistema-ct-boxe\ct-boxe-web\runSQL.cjs
+  1:20  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+D:\Sistema-ct-boxe\ct-boxe-web\runSQL_fase7.cjs
+  1:20  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+D:\Sistema-ct-boxe\ct-boxe-web\runSQL_fase_app.cjs
+  1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  3:20  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+D:\Sistema-ct-boxe\ct-boxe-web\seed.cjs
+  1:26  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\contratos\[id]\page.tsx
+    5:92  warning  'FileText' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   10:22  warning  'formatCurrency' is defined but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  228:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\feed\page.tsx
+  93:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\financeiro\inadimplencia\page.tsx
+  21:15  warning  'diasAtraso' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\stories\novo\page.tsx
+    5:29  warning  'X' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+  206:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\stories\page.tsx
+  94:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\app\(dashboard)\timer\page.tsx
+  71:17  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\components\layout\Header.tsx
+  3:16  warning  'Search' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\components\shared\AvatarInitials.tsx
+  38:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useAlunos.ts
+   65:8  warning  React Hook useCallback has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+   98:8  warning  React Hook useCallback has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+  101:9  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useAlunos.ts:101:9
+   99 |
+  100 |     useEffect(() => {
+> 101 |         fetch()
+      |         ^^^^^ Avoid calling setState() directly within an effect
+  102 |     }, [fetch])
+  103 |
+  104 |     return { aluno, loading, error, refetch: fetch }  react-hooks/set-state-in-effect
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useAvaliacoes.ts
+  22:8   warning  React Hook useCallback has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/exhaustive-deps
+  24:23  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useAvaliacoes.ts:24:23
+  22 |     }, [alunoId])
+  23 |
+> 24 |     useEffect(() => { fetch() }, [fetch])
+     |                       ^^^^^ Avoid calling setState() directly within an effect
+  25 |     return { avaliacoes, loading, refetch: fetch }
+  26 | }
+  27 |  react-hooks/set-state-in-effect
+  39:8   warning  React Hook useCallback has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/exhaustive-deps
+  41:23  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useAvaliacoes.ts:41:23
+  39 |     }, [id])
+  40 |
+> 41 |     useEffect(() => { fetch() }, [fetch])
+     |                       ^^^^^ Avoid calling setState() directly within an effect
+  42 |     return { avaliacao, loading, refetch: fetch }
+  43 | }
+  44 |        react-hooks/set-state-in-effect
+  47:50  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  63:8   warning  React Hook useEffect has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/exhaustive-deps
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useCandidatos.ts
+  42:8   warning  React Hook useCallback has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+  44:23  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useCandidatos.ts:44:23
+  42 |     }, [status])
+  43 |
+> 44 |     useEffect(() => { fetch() }, [fetch])
+     |                       ^^^^^ Avoid calling setState() directly within an effect
+  45 |
+  46 |     return { candidatos, loading, total, pendentes, refetch: fetch }
+  47 | }  react-hooks/set-state-in-effect
+  60:8   warning  React Hook useCallback has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+  62:23  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useCandidatos.ts:62:23
+  60 |     }, [id])
+  61 |
+> 62 |     useEffect(() => { fetch() }, [fetch])
+     |                       ^^^^^ Avoid calling setState() directly within an effect
+  63 |
+  64 |     return { candidato, loading, refetch: fetch }
+  65 | }                         react-hooks/set-state-in-effect
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useFeed.ts
+  20:8   warning  React Hook useCallback has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/exhaustive-deps
+  22:23  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useFeed.ts:22:23
+  20 |     }, [])
+  21 |
+> 22 |     useEffect(() => { fetch() }, [fetch])
+     |                       ^^^^^ Avoid calling setState() directly within an effect
+  23 |
+  24 |     return { posts, loading, refetch: fetch }
+  25 | }    react-hooks/set-state-in-effect
+  40:8   warning  React Hook useCallback has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/exhaustive-deps
+  42:23  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useFeed.ts:42:23
+  40 |     }, [])
+  41 |
+> 42 |     useEffect(() => { fetch() }, [fetch])
+     |                       ^^^^^ Avoid calling setState() directly within an effect
+  43 |
+  44 |     return { stories, loading, refetch: fetch }
+  45 | }  react-hooks/set-state-in-effect
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useFinanceiro.ts
+  25:8   warning  React Hook useCallback has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+  27:23  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useFinanceiro.ts:27:23
+  25 |     }, [])
+  26 |
+> 27 |     useEffect(() => { fetch() }, [fetch])
+     |                       ^^^^^ Avoid calling setState() directly within an effect
+  28 |
+  29 |     return { inadimplentes, loading, totalEmAberto, refetch: fetch }
+  30 | }          react-hooks/set-state-in-effect
+  56:8   warning  React Hook useCallback has a missing dependency: 'supabase'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+  58:23  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Sistema-ct-boxe\ct-boxe-web\src\hooks\useFinanceiro.ts:58:23
+  56 |     }, [])
+  57 |
+> 58 |     useEffect(() => { fetch() }, [fetch])
+     |                       ^^^^^ Avoid calling setState() directly within an effect
+  59 |
+  60 |     return { pagamentos, loading, totalPago, totalPendente, refetch: fetch }
+  61 | }  react-hooks/set-state-in-effect
+
+Ô£û 40 problems (18 errors, 22 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

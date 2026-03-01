@@ -1,0 +1,26 @@
+{
+  "name": "sistema-ct-boxe",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema completo de gerenciamento do Centro de Treinamento de Boxe",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gabrielfeelix/sistema-ct-boxe.git"
+  },
+  "author": "Gabriel Felix",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev:web": "pnpm --filter @ct-boxe/web dev",
+    "dev:app": "pnpm --filter @ct-boxe/app start",
+    "build:web": "pnpm --filter @ct-boxe/web build",
+    "build:app": "pnpm --filter @ct-boxe/app build",
+    "lint": "pnpm --filter \"./packages/**\" lint",
+    "typecheck": "pnpm --filter \"./packages/**\" typecheck",
+    "clean": "rm -rf packages/*/node_modules packages/*/.next packages/*/.turbo packages/*/dist node_modules"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

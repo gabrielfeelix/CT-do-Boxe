@@ -1,0 +1,26 @@
+.next/dev/types/validator.ts(71,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/(dashboard)/alunos/[id]/page.tsx' is not a module.
+.next/dev/types/validator.ts(98,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/(dashboard)/aulas/[id]/page.tsx' is not a module.
+.next/dev/types/validator.ts(125,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/(dashboard)/candidatos/[id]/page.tsx' is not a module.
+.next/dev/types/validator.ts(170,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/(dashboard)/contratos/[id]/page.tsx' is not a module.
+.next/dev/types/validator.ts(269,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/(dashboard)/presenca/[aulaId]/page.tsx' is not a module.
+.next/dev/types/validator.ts(314,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/alunos/[id]/route.ts' is not a module.
+.next/dev/types/validator.ts(323,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/alunos/route.ts' is not a module.
+.next/dev/types/validator.ts(332,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/aulas/[id]/route.ts' is not a module.
+.next/dev/types/validator.ts(341,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/aulas/route.ts' is not a module.
+.next/dev/types/validator.ts(350,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/auth/callback/route.ts' is not a module.
+.next/dev/types/validator.ts(359,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/candidatos/[id]/route.ts' is not a module.
+.next/dev/types/validator.ts(368,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/candidatos/route.ts' is not a module.
+.next/dev/types/validator.ts(377,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/contratos/[id]/route.ts' is not a module.
+.next/dev/types/validator.ts(386,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/contratos/route.ts' is not a module.
+.next/dev/types/validator.ts(395,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/feed/route.ts' is not a module.
+.next/dev/types/validator.ts(404,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/financeiro/route.ts' is not a module.
+.next/dev/types/validator.ts(413,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/notificacoes/route.ts' is not a module.
+.next/dev/types/validator.ts(422,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/pagamentos/route.ts' is not a module.
+.next/dev/types/validator.ts(431,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/pagamentos/webhook/route.ts' is not a module.
+.next/dev/types/validator.ts(440,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/presenca/route.ts' is not a module.
+.next/dev/types/validator.ts(449,39): error TS2306: File 'D:/Sistema-ct-boxe/ct-boxe-web/src/app/api/stories/route.ts' is not a module.
+src/components/dashboard/ReceitaChart.tsx(70,25): error TS2322: Type '(value: number) => [string, ""]' is not assignable to type 'Formatter<number, ""> & ((value: number, name: "", item: Payload<number, "">, index: number, payload: Payload<number, "">[]) => ReactNode | [...])'.
+  Type '(value: number) => [string, ""]' is not assignable to type 'Formatter<number, "">'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
