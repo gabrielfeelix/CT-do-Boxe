@@ -7,6 +7,7 @@ import { useContrato } from '@/hooks/useContratos'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { AvatarInitials } from '@/components/shared/AvatarInitials'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
+import { ConfirmModal } from '@/components/shared/ConfirmModal'
 import { formatDate, formatCurrency } from '@/lib/utils/formatters'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -18,6 +19,8 @@ export default function ContratoDetalhePage() {
     const { contrato, loading, refetch } = useContrato(id)
     const [gerando, setGerando] = useState(false)
     const [copiado, setCopiado] = useState(false)
+    const [modalCancelamentoAberta, setModalCancelamentoAberta] = useState(false)
+    const [cancelando, setCancelando] = useState(false)
     const [qrData, setQrData] = useState<{ qr_code_base64?: string; pix_copia_cola?: string } | null>(null)
     const supabase = createClient()
 
@@ -64,10 +67,12 @@ export default function ContratoDetalhePage() {
 
     async function handleCancelar() {
         if (!contrato) return
-        if (!confirm('Atenção: Cancelar a assinatura vai cortar imediatamente as permissões no App. Tem certeza?')) return
+        setCancelando(true)
         const { error } = await supabase.from('contratos').update({ status: 'cancelado' }).eq('id', contrato.id)
         if (error) toast.error('Falha no banco ao cancelar vínculo.')
         else { toast.success('Vínculo comercial rompido com sucesso.'); refetch() }
+        setCancelando(false)
+        setModalCancelamentoAberta(false)
     }
 
     if (loading) return <div className="pt-20"><LoadingSpinner label="Puxando termos do contrato..." /></div>
@@ -207,7 +212,7 @@ export default function ContratoDetalhePage() {
                 </button>
 
                 <button
-                    onClick={handleCancelar}
+                    onClick={() => setModalCancelamentoAberta(true)}
                     disabled={contrato.status === 'cancelado'}
                     className="flex flex-col items-center justify-center gap-3 p-5 h-28 bg-white border border-gray-200 text-red-600 hover:bg-red-50 hover:border-red-200 disabled:opacity-40 rounded-2xl transition-all duration-300 shadow-sm hover:shadow"
                 >
@@ -249,6 +254,17 @@ export default function ContratoDetalhePage() {
                     </div>
                 </div>
             )}
+
+            <ConfirmModal
+                isOpen={modalCancelamentoAberta}
+                onClose={() => !cancelando && setModalCancelamentoAberta(false)}
+                onConfirm={handleCancelar}
+                title="Rescindir Contrato"
+                description={`Atenção: Cancelar a assinatura de ${contrato.aluno_nome} vai cortar imediatamente as permissões no App e as cobranças futuras. Tem certeza?`}
+                confirmText="Cancelar Assinatura"
+                variant="danger"
+                isLoading={cancelando}
+            />
         </div>
     )
 }

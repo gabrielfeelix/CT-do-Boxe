@@ -1,10 +1,6 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { MercadoPagoConfig, Payment } from 'mercadopago'
-
-const mpClient = new MercadoPagoConfig({
-    accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
-})
+import { Payment, MercadoPagoConfig } from 'mercadopago'
 
 export async function POST(req: NextRequest) {
     try {
@@ -16,10 +12,25 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Dados incompletos.' }, { status: 400 })
         }
 
-        const payment = new Payment(mpClient)
+        const payment = new MercadoPagoConfig({ accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '' })
 
-        // Cria cobrança PIX no Mercado Pago
-        const mpResponse = await payment.create({
+        // ----------------------------------------------------
+        // MOCK DE DEVESA: Se não tem Token MP na env local
+        // ----------------------------------------------------
+        if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
+            console.warn('🔔 [API PIX] MERCADOPAGO_ACCESS_TOKEN ausente. Gerando PIX MOCKADO para preview de interface.')
+            return NextResponse.json({
+                pagamento_id: 'mock-' + Date.now(),
+                qr_code_base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', // pixel branco mock
+                pix_copia_cola: '00020101021126580014br.gov.bcb.pix0136mock-pix-key-para-visualizacao-apenas5204000053039865802BR5915CT BOXE TESTE6009SAO PAULO62070503***6304A1B2',
+                mercadopago_id: 'mock-12345',
+                status: 'pending'
+            })
+        }
+
+
+        const p = new Payment(payment)
+        const mpResponse = await p.create({
             body: {
                 transaction_amount: parseFloat(valor),
                 description: descricao || 'Mensalidade CT Boxe',
@@ -30,7 +41,7 @@ export async function POST(req: NextRequest) {
                     last_name: nome_pagador?.split(' ').slice(1).join(' ') || '',
                     identification: cpf_pagador ? { type: 'CPF', number: cpf_pagador.replace(/\D/g, '') } : undefined,
                 },
-                notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/pagamentos/webhook`,
+                notification_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/pagamentos/webhook`,
             },
         })
 

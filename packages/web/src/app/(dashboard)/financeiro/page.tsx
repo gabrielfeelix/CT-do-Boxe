@@ -8,12 +8,11 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { formatCurrency, formatDate } from '@/lib/utils/formatters'
 import { AvatarInitials } from '@/components/shared/AvatarInitials'
 
-function MetricaCard({ title, value, subtitle, icon: Icon, cor, gradient }: {
-    title: string; value: string; subtitle?: string; icon: React.ElementType; cor: string; gradient?: string
+function MetricaCard({ title, value, subtitle, icon: Icon, cor }: {
+    title: string; value: string; subtitle?: string; icon: React.ElementType; cor: string;
 }) {
     return (
         <div className={`bg-white rounded-2xl border border-gray-100 shadow-sm p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300`}>
-            {gradient && <div className={`absolute top-0 right-0 w-32 h-32 ${gradient} blur-[60px] opacity-20 -mr-10 -mt-10 pointer-events-none transition-opacity group-hover:opacity-40`} />}
 
             <div className="flex items-start justify-between relative z-10">
                 <div className="pr-4">
@@ -54,10 +53,10 @@ export default function FinanceiroPage() {
                 <>
                     {/* Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                        <MetricaCard title="Recebido no mês" value={formatCurrency(totalPago)} subtitle="Pagamentos confirmados" icon={DollarSign} cor="bg-emerald-100 text-emerald-700" gradient="bg-emerald-500" />
-                        <MetricaCard title="A receber" value={formatCurrency(totalPendente)} subtitle="Cobranças pendentes" icon={Clock} cor="bg-blue-100 text-blue-700" gradient="bg-blue-500" />
-                        <MetricaCard title="Em atraso" value={formatCurrency(totalEmAberto)} subtitle={`${inadimplentes.length} aluno(s) com pagamento atrasado`} icon={AlertTriangle} cor="bg-red-100 text-red-700" gradient="bg-red-500" />
-                        <MetricaCard title="Previsão total" value={formatCurrency(totalPago + totalPendente)} subtitle="Receita esperada no mês" icon={TrendingUp} cor="bg-[#111827] text-white" gradient="bg-gray-500" />
+                        <MetricaCard title="Recebido no mês" value={formatCurrency(totalPago)} subtitle="Pagamentos confirmados" icon={DollarSign} cor="bg-emerald-100 text-emerald-700" />
+                        <MetricaCard title="A receber" value={formatCurrency(totalPendente)} subtitle="Cobranças pendentes" icon={Clock} cor="bg-blue-100 text-blue-700" />
+                        <MetricaCard title="Em atraso" value={formatCurrency(totalEmAberto)} subtitle={`${inadimplentes.length} aluno(s) com pagamento atrasado`} icon={AlertTriangle} cor="bg-red-100 text-red-700" />
+                        <MetricaCard title="Previsão total" value={formatCurrency(totalPago + totalPendente)} subtitle="Receita esperada no mês" icon={TrendingUp} cor="bg-gray-100 text-gray-700" />
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -121,8 +120,7 @@ export default function FinanceiroPage() {
                         {/* Inadimplentes destaque - Sidebar Direita */}
                         <div className="space-y-6">
                             {inadimplentes.length > 0 && (
-                                <div className="bg-gradient-to-br from-red-50 to-orange-50/50 border border-red-200/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-red-400 blur-[80px] opacity-20 pointer-events-none" />
+                                <div className="bg-white border border-red-100 rounded-3xl p-6 shadow-sm relative overflow-hidden">
 
                                     <div className="flex items-center justify-between mb-5 relative z-10">
                                         <h3 className="text-sm font-black text-red-900 uppercase tracking-widest flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> Cobranças em atraso</h3>

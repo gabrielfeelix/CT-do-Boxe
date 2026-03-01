@@ -7,14 +7,16 @@ import { createClient } from '@/lib/supabase/client'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { toast } from 'sonner'
 
+import { Activity, Ruler, HeartPulse, ShieldAlert, FileText } from 'lucide-react'
+
 type Secao = 'antropometrico' | 'medidas' | 'condicionamento' | 'tecnica' | 'resultado'
 
-const SECOES: { id: Secao; label: string; emoji: string }[] = [
-    { id: 'antropometrico', label: 'Dados físicos', emoji: '⚖️' },
-    { id: 'medidas', label: 'Medidas', emoji: '📏' },
-    { id: 'condicionamento', label: 'Condicionamento', emoji: '🏃' },
-    { id: 'tecnica', label: 'Técnica', emoji: '🥊' },
-    { id: 'resultado', label: 'Resultado', emoji: '📋' },
+const SECOES: { id: Secao; label: string; icon: React.ElementType }[] = [
+    { id: 'antropometrico', label: 'Dados físicos', icon: Activity },
+    { id: 'medidas', label: 'Medidas', icon: Ruler },
+    { id: 'condicionamento', label: 'Condicionamento', icon: HeartPulse },
+    { id: 'tecnica', label: 'Técnica', icon: ShieldAlert },
+    { id: 'resultado', label: 'Resultado', icon: FileText },
 ]
 
 function calcularIMC(peso: string, altura: string): string {
@@ -208,7 +210,7 @@ export default function NovaAvaliacaoPage() {
                         className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex-1 justify-center
               ${secao === s.id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
-                        <span>{s.emoji}</span> {s.label}
+                        <s.icon className="w-4 h-4" /> {s.label}
                     </button>
                 ))}
             </div>
