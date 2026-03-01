@@ -10,6 +10,8 @@ interface AulaFiltersProps {
     onStatusChange: (value: AulaStatus | 'todos') => void
     categoria: CategoriaAula | 'todos'
     onCategoriaChange: (value: CategoriaAula | 'todos') => void
+    professor: string
+    onProfessorChange: (value: string) => void
     dataInicio: string
     onDataInicioChange: (value: string) => void
     dataFim: string
@@ -36,6 +38,8 @@ export function AulaFilters({
     onStatusChange,
     categoria,
     onCategoriaChange,
+    professor,
+    onProfessorChange,
     dataInicio,
     onDataInicioChange,
     dataFim,
@@ -43,7 +47,7 @@ export function AulaFilters({
 }: AulaFiltersProps) {
     return (
         <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 <div className="md:col-span-2">
                     <SearchInput
                         value={busca}
@@ -84,6 +88,17 @@ export function AulaFilters({
                             </option>
                         ))}
                     </select>
+                </div>
+
+                <div>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        Professor(a)
+                    </label>
+                    <SearchInput
+                        value={professor}
+                        onChange={onProfessorChange}
+                        placeholder="Nome do instrutor..."
+                    />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">

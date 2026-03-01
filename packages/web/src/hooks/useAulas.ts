@@ -106,6 +106,7 @@ interface UseAulasOptions {
     busca?: string
     status?: AulaStatus | 'todos'
     categoria?: CategoriaAula | 'todos'
+    professor?: string
     dataInicio?: string
     dataFim?: string
     limit?: number
@@ -162,6 +163,7 @@ export function useAulas({
     busca = '',
     status = 'todos',
     categoria = 'todos',
+    professor = '',
     dataInicio = '',
     dataFim = '',
     limit = 100,
@@ -195,6 +197,10 @@ export function useAulas({
                 query = query.eq('categoria', categoria)
             }
 
+            if (professor.trim()) {
+                query = query.ilike('professor', `%${professor.trim()}%`)
+            }
+
             if (busca.trim()) {
                 query = query.ilike('titulo', `%${busca.trim()}%`)
             }
@@ -221,7 +227,7 @@ export function useAulas({
         } finally {
             setLoading(false)
         }
-    }, [supabase, status, categoria, busca, dataInicio, dataFim, limit])
+    }, [supabase, status, categoria, professor, busca, dataInicio, dataFim, limit])
 
     useEffect(() => {
         fetchAulas()

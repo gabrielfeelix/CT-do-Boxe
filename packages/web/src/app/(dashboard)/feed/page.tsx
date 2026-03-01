@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { PenSquare, Heart, MessageCircle, Trash2, EyeOff, LayoutTemplate } from 'lucide-react'
+import { PenSquare, Heart, MessageCircle, Trash2, EyeOff, LayoutTemplate, Image as ImageIcon } from 'lucide-react'
 import { useFeed } from '@/hooks/useFeed'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -23,6 +22,42 @@ export default function FeedPage() {
     const { posts, loading, refetch } = useFeed()
     const supabase = createClient()
     const [excluindo, setExcluindo] = useState<string | null>(null)
+
+    // Formulario Inline
+    const [conteudo, setConteudo] = useState('')
+    const [imagemUrl, setImagemUrl] = useState('')
+    const [salvando, setSalvando] = useState(false)
+    const [showImageInput, setShowImageInput] = useState(false)
+
+    const limite = 2000
+    const restantes = limite - conteudo.length
+
+    async function handlePublicar() {
+        if (!conteudo.trim()) { toast.error('O texto do comunicado está vazio.'); return }
+        if (conteudo.length > limite) { toast.error(`Limite de caracteres excedido (${limite} máx)`); return }
+
+        setSalvando(true)
+
+        const { error } = await supabase.from('posts').insert({
+            conteudo: conteudo.trim(),
+            imagem_url: imagemUrl.trim() || null,
+            autor: 'Professor',
+            publicado: true,
+        })
+
+        if (error) {
+            toast.error('Falha ao criar publicação. Tente novamente.')
+            setSalvando(false)
+            return
+        }
+
+        toast.success('Comunicado publicado no Feed!')
+        setConteudo('')
+        setImagemUrl('')
+        setShowImageInput(false)
+        setSalvando(false)
+        refetch()
+    }
 
     async function excluirPost(id: string, conteudo: string) {
         const preview = conteudo.slice(0, 40) + (conteudo.length > 40 ? '...' : '')
@@ -47,22 +82,67 @@ export default function FeedPage() {
     return (
         <div className="space-y-6 max-w-3xl mx-auto pb-12 animate-in slide-in-from-bottom-2 duration-500">
 
-            {/* Premium Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
-                <div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                        <LayoutTemplate className="w-6 h-6 text-[#CC0000]" /> Feed do CT
-                    </h2>
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">
-                        {loading ? 'Carregando publicações...' : `Comunicados publicados para os alunos`}
-                    </p>
+            {/* Criador de Feed (Estilo Facebook/Twitter) */}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-6 mb-8 group relative focus-within:ring-2 focus-within:ring-[#CC0000]/20 focus-within:border-[#CC0000] focus-within:shadow-md transition-all">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-800 to-[#CC0000]" />
+                <div className="p-5 space-y-3">
+                    <div className="flex gap-4 items-start">
+                        <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center text-white text-sm font-black shadow-inner shrink-0 leading-none">
+                            PR
+                        </div>
+                        <div className="flex-1">
+                            <textarea
+                                value={conteudo}
+                                onChange={e => setConteudo(e.target.value)}
+                                placeholder="Compartilhe um comunicado com seus alunos... (Aviso, Dica, etc.)"
+                                rows={conteudo.length > 50 || showImageInput ? 3 : 1}
+                                className="w-full text-sm sm:text-base text-gray-800 placeholder:text-gray-400 bg-transparent resize-none focus:outline-none leading-relaxed font-medium mt-1 transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    {showImageInput && (
+                        <div className="pl-14 sm:pl-16 pr-2 pb-2">
+                            <input
+                                type="url"
+                                placeholder="Cole a URL da imagem opcional"
+                                value={imagemUrl}
+                                onChange={e => setImagemUrl(e.target.value)}
+                                autoFocus
+                                className="w-full text-xs font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:bg-white focus:border-[#CC0000] focus:ring-1 focus:ring-[#CC0000] transition-all"
+                            />
+                            {imagemUrl && (
+                                <div className="mt-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><EyeOff className="w-3 h-3" /> A imagem carregará finalizada no post.</div>
+                            )}
+                        </div>
+                    )}
                 </div>
-                <Link
-                    href="/feed/novo"
-                    className="bg-gray-900 hover:bg-black text-white text-sm font-bold uppercase tracking-widest px-6 py-3 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-2 max-w-fit"
-                >
-                    <PenSquare className="h-4 w-4" /> + Novo comunicado
-                </Link>
+
+                {/* Footer do Editor */}
+                <div className="px-5 pb-4 pl-14 sm:pl-16 pt-2 border-t border-gray-50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setShowImageInput(!showImageInput)}
+                            className={`p-2 rounded-full transition-colors ${showImageInput ? 'bg-red-50 text-[#CC0000] hover:bg-red-100' : 'text-gray-400 hover:bg-gray-100'}`}
+                            title="Anexar Imagem URL"
+                        >
+                            <ImageIcon className="w-4 h-4" />
+                        </button>
+
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded bg-gray-50 border flex items-center gap-1.5 ${restantes < 50 ? 'border-red-200 text-red-600' : 'border-gray-100 text-gray-400'}`}>
+                            {restantes < 50 && <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-400 opacity-75 mr-2"></span>}
+                            {restantes}
+                        </span>
+                    </div>
+
+                    <button
+                        onClick={handlePublicar}
+                        disabled={salvando || !conteudo.trim()}
+                        className="py-2.5 px-6 text-xs sm:text-sm font-black text-white uppercase tracking-widest bg-gray-900 hover:bg-black border-black disabled:opacity-50 disabled:bg-gray-300 rounded-xl transition-all shadow-sm active:scale-[0.98] flex items-center gap-2"
+                    >
+                        {salvando ? <LoadingSpinner size="sm" /> : 'Publicar'}
+                    </button>
+                </div>
             </div>
 
             {loading ? <LoadingSpinner label="Puxando fios da linha do tempo..." /> :
@@ -71,7 +151,7 @@ export default function FeedPage() {
                         icon={PenSquare}
                         title="Sua Linha do Tempo está Vazia"
                         description="Compartilhe com seus alunos! Lance o primeiro comunicado e traga vida ao app."
-                        action={{ label: 'Criar Minha Primeira Postagem', onClick: () => window.location.href = '/feed/novo' }}
+                        action={{ label: 'Adicione pelo quadro acima↑', onClick: () => document.querySelector('textarea')?.focus() }}
                     />
                 ) : (
                     <div className="space-y-6">

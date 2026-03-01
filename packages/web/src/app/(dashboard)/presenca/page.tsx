@@ -13,24 +13,29 @@ export default function PresencaPage() {
     const dataLimite = new Date()
     dataLimite.setDate(dataLimite.getDate() + 7)
 
+    const [dataFiltro, setDataFiltro] = useState(hoje)
+    const [professorFiltro, setProfessorFiltro] = useState('')
     const [busca, setBusca] = useState('')
 
     const { aulas, loading, error } = useAulas({
         status: 'agendada',
-        dataInicio: hoje,
-        dataFim: dataLimite.toISOString().slice(0, 10),
-        limit: 50,
+        dataInicio: dataFiltro,
+        dataFim: dataFiltro, // Filtra exatamente o dia selecionado para focar no diário
+        limit: 100,
     })
+
+    const professoresUnicos = Array.from(new Set(aulas.map(a => a.professor))).filter(Boolean)
 
     const proximasAulas = useMemo(() => {
         return aulas
-            .filter(a => a.titulo.toLowerCase().includes(busca.toLowerCase()) || a.professor.toLowerCase().includes(busca.toLowerCase()))
+            .filter(a => a.titulo.toLowerCase().includes(busca.toLowerCase()))
+            .filter(a => professorFiltro ? a.professor === professorFiltro : true)
             .sort((a, b) => {
                 const first = new Date(`${a.data}T${a.hora_inicio}`).getTime()
                 const second = new Date(`${b.data}T${b.hora_inicio}`).getTime()
                 return first - second
             })
-    }, [aulas, busca])
+    }, [aulas, busca, professorFiltro])
 
     return (
         <div className="mx-auto max-w-[1440px] space-y-6 pb-8 animate-in slide-in-from-bottom-2 duration-300">
@@ -40,21 +45,51 @@ export default function PresencaPage() {
                         <CalendarCheck2 className="w-6 h-6 text-[#CC0000]" /> Diário de Classe
                     </h2>
                     <p className="mt-1 text-sm font-medium text-gray-400">
-                        Selecione a aula abaixo para realizar a chamada linear dos alunos.
+                        Filtre e selecione a aula abaixo para realizar a chamada dos alunos.
                     </p>
                 </div>
+            </header>
 
-                <div className="relative max-w-sm w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="relative w-full">
+                    <label className="text-[10px] uppercase font-black tracking-widest text-gray-400 mb-1.5 block">Buscar por Título</label>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Buscar turma..."
+                            value={busca}
+                            onChange={(e) => setBusca(e.target.value)}
+                            className="w-full pl-9 pr-4 h-11 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-colors font-medium cursor-text"
+                        />
+                    </div>
+                </div>
+
+                <div className="relative w-full">
+                    <label className="text-[10px] uppercase font-black tracking-widest text-gray-400 mb-1.5 block">Data do Diário</label>
                     <input
-                        type="text"
-                        placeholder="Buscar por turma ou professor..."
-                        value={busca}
-                        onChange={(e) => setBusca(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-colors shadow-sm font-medium"
+                        type="date"
+                        value={dataFiltro}
+                        onChange={(e) => setDataFiltro(e.target.value)}
+                        className="w-full px-4 h-11 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-colors font-medium cursor-pointer"
                     />
                 </div>
-            </header>
+
+                <div className="relative w-full">
+                    <label className="text-[10px] uppercase font-black tracking-widest text-gray-400 mb-1.5 block">Professor(a)</label>
+                    <select
+                        value={professorFiltro}
+                        onChange={(e) => setProfessorFiltro(e.target.value)}
+                        className="w-full px-4 h-11 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-colors font-medium cursor-pointer appearance-none"
+                    >
+                        <option value="">Todos os Professores</option>
+                        <option value="Argel Riboli">Argel Riboli</option>
+                        {professoresUnicos.filter(p => p !== 'Argel Riboli').map(prof => (
+                            <option key={prof} value={prof}>{prof}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
 
             {loading ? (
                 <div className="pt-10"><LoadingSpinner label="Carregando turmas agendadas..." /></div>

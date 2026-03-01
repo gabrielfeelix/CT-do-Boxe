@@ -17,6 +17,7 @@ export default function AulasPage() {
     const [busca, setBusca] = useState('')
     const [status, setStatus] = useState<'todos' | 'agendada' | 'realizada' | 'cancelada'>('todos')
     const [categoria, setCategoria] = useState<'todos' | 'infantil' | 'adulto'>('todos')
+    const [professor, setProfessor] = useState('')
     const [dataInicio, setDataInicio] = useState('')
     const [dataFim, setDataFim] = useState('')
     const [aulaCancelamento, setAulaCancelamento] = useState<AulaResumo | null>(null)
@@ -35,6 +36,7 @@ export default function AulasPage() {
         busca,
         status,
         categoria,
+        professor,
         dataInicio,
         dataFim,
         limit: 100,
@@ -101,6 +103,7 @@ export default function AulasPage() {
                 busca={busca} onBuscaChange={setBusca}
                 status={status} onStatusChange={setStatus}
                 categoria={categoria} onCategoriaChange={setCategoria}
+                professor={professor} onProfessorChange={setProfessor}
                 dataInicio={dataInicio} onDataInicioChange={setDataInicio}
                 dataFim={dataFim} onDataFimChange={setDataFim}
             />
