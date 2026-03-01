@@ -31,7 +31,9 @@
       "Bash(node -e:*)",
       "Bash(npx --no-install tsc:*)",
       "Bash(npx expo start:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(vercel logs:*)",
+      "Bash(vercel:*)"
     ]
   }
 }
