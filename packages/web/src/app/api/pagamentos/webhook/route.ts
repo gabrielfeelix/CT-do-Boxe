@@ -1,14 +1,55 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
+import crypto from 'crypto'
 
 const mpClient = new MercadoPagoConfig({
     accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
 })
 
+function validateWebhookSignature(req: NextRequest, body: any): boolean {
+    const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET
+    if (!secret) return true // Se não tem secret configurado, aceita (modo dev)
+
+    const xSignature = req.headers.get('x-signature')
+    const xRequestId = req.headers.get('x-request-id')
+
+    if (!xSignature || !xRequestId) return false
+
+    // Parse da assinatura: ts=123456789,v1=hash
+    const parts = xSignature.split(',')
+    let ts = ''
+    let hash = ''
+
+    parts.forEach(part => {
+        const [key, value] = part.split('=')
+        if (key === 'ts') ts = value
+        if (key === 'v1') hash = value
+    })
+
+    if (!ts || !hash) return false
+
+    // Cria o manifest
+    const dataId = body.data?.id || ''
+    const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`
+
+    // Calcula HMAC-SHA256
+    const hmac = crypto.createHmac('sha256', secret)
+    hmac.update(manifest)
+    const calculatedHash = hmac.digest('hex')
+
+    return calculatedHash === hash
+}
+
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json()
+
+        // Valida assinatura do webhook
+        if (!validateWebhookSignature(req, body)) {
+            console.error('Webhook signature inválida')
+            return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+        }
 
         // Mercado Pago envia notificações de tipo "payment"
         if (body.type !== 'payment') {
