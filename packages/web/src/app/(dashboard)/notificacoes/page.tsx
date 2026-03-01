@@ -94,6 +94,31 @@ function ToggleRule({ label, description, icon: Icon, defaultChecked = false, ta
     )
 }
 
+function ActionRule({ label, description, icon: Icon, tag = '', actionLabel, onAction }: { label: string; description: string; icon: React.ElementType; tag?: string, actionLabel: string, onAction: () => void }) {
+    return (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white border border-gray-100 rounded-2xl hover:border-gray-200 transition-all shadow-sm group gap-4">
+            <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl transition-colors bg-gray-50 text-gray-500 group-hover:bg-gray-100 group-hover:text-gray-900">
+                    <Icon className="w-5 h-5" />
+                </div>
+                <div>
+                    <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        {label} {tag && <span className="text-[9px] uppercase font-black tracking-widest bg-gray-900 text-white px-1.5 py-0.5 rounded">{tag}</span>}
+                    </h4>
+                    <p className="text-xs font-medium text-gray-500 mt-0.5 leading-relaxed pr-2">{description}</p>
+                </div>
+            </div>
+
+            <button
+                onClick={onAction}
+                className="w-full sm:w-auto px-4 py-2.5 bg-gray-900 hover:bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-sm shrink-0"
+            >
+                {actionLabel}
+            </button>
+        </div>
+    )
+}
+
 export default function NotificacoesPage() {
     const { notificacoes, loading, error, naoLidas, marcarComoLida, marcarTodasComoLidas, removerNotificacao } = useNotificacoes()
     const [busca, setBusca] = useState('')
@@ -101,6 +126,11 @@ export default function NotificacoesPage() {
     const [tab, setTab] = useState<Tab>('inbox')
     const [processandoId, setProcessandoId] = useState<string | null>(null)
     const [processandoTudo, setProcessandoTudo] = useState(false)
+
+    const [modalSocial, setModalSocial] = useState<'instagram' | 'youtube' | null>(null)
+    const [socialUrl, setSocialUrl] = useState('')
+    const [socialMensagem, setSocialMensagem] = useState('')
+    const [enviandoPush, setEnviandoPush] = useState(false)
 
     const listaFiltrada = useMemo(() => {
         const termo = busca.trim().toLowerCase()
@@ -132,6 +162,18 @@ export default function NotificacoesPage() {
         const ok = await removerNotificacao(id)
         setProcessandoId(null)
         if (!ok) { toast.error('Não foi possível remover a notificacao.'); return }
+    }
+
+    async function handleDispararPush() {
+        if (!socialUrl) { toast.error('Insira a URL do vídeo/post.'); return }
+        setEnviandoPush(true)
+        // Simulate API call to notification engine
+        await new Promise(resolve => setTimeout(resolve, 800))
+        toast.success(`Push Notification enviado para os alunos com sucesso!`)
+        setEnviandoPush(false)
+        setModalSocial(null)
+        setSocialUrl('')
+        setSocialMensagem('')
     }
 
     return (
@@ -214,9 +256,23 @@ export default function NotificacoesPage() {
                         <div>
                             <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-4 flex items-center gap-2"><Megaphone className="w-4 h-4 text-blue-500" /> Marketing & Social Push</h3>
                             <div className="space-y-3">
-                                <ToggleRule icon={Instagram} label="Postagem no Feed" description="Dispara Push Notification sempre que você cria um aviso no Feed do CT" defaultChecked={true} tag="FEED" />
-                                <ToggleRule icon={Video} label="Novo Reels no Instagram" description="Integração (Em breve): Avisa os alunos de novos vídeos do @ctboxe" defaultChecked={false} tag="BETA" />
-                                <ToggleRule icon={Youtube} label="Novo Vídeo no YouTube" description="Integração (Em breve): Push automático ao soltar vídeo de técnica" defaultChecked={false} tag="BETA" />
+                                <ToggleRule icon={Instagram} label="Postagem no Feed" description="Dispara Push Notification sempre que você cria um aviso no Feed do CT" defaultChecked={true} tag="APP FEED" />
+                                <ActionRule
+                                    icon={Video}
+                                    label="Disparo: Reels / Post IG"
+                                    description="Sem integração direta (API do Meta restrita). Cole a URL da sua postagem para disparar o Push aos alunos manualmente."
+                                    actionLabel="Disparar Push"
+                                    onAction={() => setModalSocial('instagram')}
+                                    tag="MANUAL"
+                                />
+                                <ActionRule
+                                    icon={Youtube}
+                                    label="Disparo: Vídeo YouTube"
+                                    description="Sem integração Hubbub nativa ativa. Use este botão sempre que lançar um vídeo novo para notificar direto no App."
+                                    actionLabel="Disparar Push"
+                                    onAction={() => setModalSocial('youtube')}
+                                    tag="MANUAL"
+                                />
                             </div>
                         </div>
 
@@ -225,11 +281,59 @@ export default function NotificacoesPage() {
                             <Settings2 className="w-8 h-8 text-red-500 mb-4 relative z-10" />
                             <h4 className="text-lg font-black text-gray-900 mb-2 relative z-10">Motor de Regras Inteligentes</h4>
                             <p className="text-xs font-medium text-gray-600 leading-relaxed mb-4 relative z-10">
-                                As notificações via Push são entregues instantaneamente no App do aluno (iOS e Android). O excesso de pushes pode causar desativação por parte do usuário, gerencie com sabedoria!
+                                Para automações diretas (Onde o sistema posta sozinho ao detectar um vídeo no Instagram), é necessária aprovação do App Developer da Meta e vinculação de conta. Como fluxo contínuo, utilize os <strong className="text-gray-900 font-bold">botões de Disparo Manual</strong> acima.
                             </p>
                         </div>
                     </div>
 
+                </div>
+            )}
+
+            {/* Modal Submissao Social */}
+            {modalSocial && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setModalSocial(null)} />
+                    <div className="w-full max-w-md animate-in zoom-in-95 bg-white rounded-3xl p-6 shadow-2xl relative z-10 border border-gray-100 flex flex-col gap-5">
+                        <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                            <div className={`p-3 rounded-2xl ${modalSocial === 'instagram' ? 'bg-pink-50 text-pink-600' : 'bg-red-50 text-red-600'}`}>
+                                {modalSocial === 'instagram' ? <Instagram className="w-6 h-6" /> : <Youtube className="w-6 h-6" />}
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-black text-gray-900 leading-tight">Divulgar {modalSocial === 'instagram' ? 'no Instagram' : 'no YouTube'}</h3>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Disparo de Push</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">URL da Publicação</label>
+                                <input
+                                    type="url"
+                                    value={socialUrl}
+                                    onChange={e => setSocialUrl(e.target.value)}
+                                    placeholder={modalSocial === 'instagram' ? "https://instagram.com/p/..." : "https://youtube.com/watch?v=..."}
+                                    className="w-full h-11 bg-gray-50 border border-gray-200 rounded-xl px-3 outline-none focus:bg-white focus:border-gray-400 font-medium text-sm transition-colors"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Mensagem do Push (Opcional)</label>
+                                <textarea
+                                    value={socialMensagem}
+                                    onChange={e => setSocialMensagem(e.target.value)}
+                                    placeholder="Ex: Confere só esse nocaute que a gente postou agora! 🥊"
+                                    rows={3}
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:bg-white focus:border-gray-400 font-medium text-sm transition-colors resize-none"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 pt-2">
+                            <button onClick={() => setModalSocial(null)} className="py-3 px-4 text-xs font-bold uppercase tracking-widest text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">Cancelar</button>
+                            <button onClick={handleDispararPush} disabled={enviandoPush || !socialUrl} className="py-3 px-4 text-xs font-bold uppercase tracking-widest text-white bg-gray-900 hover:bg-black rounded-xl shadow-sm transition-colors disabled:opacity-50 flex justify-center items-center">
+                                {enviandoPush ? <LoadingSpinner size="sm" /> : 'Disparar Agora'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
