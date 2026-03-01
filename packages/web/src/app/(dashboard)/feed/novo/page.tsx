@@ -11,6 +11,7 @@ export default function NovoPostPage() {
     const supabase = createClient()
 
     const [conteudo, setConteudo] = useState('')
+    const [imagemUrl, setImagemUrl] = useState('')
     const [preview, setPreview] = useState(false)
     const [salvando, setSalvando] = useState(false)
 
@@ -25,6 +26,7 @@ export default function NovoPostPage() {
 
         const { error } = await supabase.from('posts').insert({
             conteudo: conteudo.trim(),
+            imagem_url: imagemUrl.trim() || null,
             autor: 'Argel Riboli',
             publicado: true,
         })
@@ -71,20 +73,38 @@ export default function NovoPostPage() {
                     </div>
 
                     {/* Editor Canvas */}
-                    <div className="rounded-2xl border border-gray-200 bg-gray-50/50 overflow-hidden relative focus-within:ring-2 focus-within:ring-[#CC0000]/20 focus-within:border-[#CC0000] focus-within:bg-white transition-all">
+                    <div className="rounded-2xl border border-gray-200 bg-gray-50/50 overflow-hidden relative focus-within:ring-2 focus-within:ring-[#CC0000]/20 focus-within:border-[#CC0000] focus-within:bg-white transition-all space-y-2 pb-0">
                         {preview ? (
-                            <div className="min-h-[250px] p-6 text-sm sm:text-base text-gray-800 font-medium leading-relaxed whitespace-pre-wrap bg-white">
-                                {conteudo || <span className="text-gray-400 italic font-bold">A tela está em branco...</span>}
+                            <div className="bg-white pb-6 rounded-b-2xl">
+                                {imagemUrl && (
+                                    <div className="w-full aspect-video sm:aspect-[21/9] relative overflow-hidden bg-gray-100 mb-6">
+                                        <img src={imagemUrl} alt="Preview" className="w-full h-full object-cover" />
+                                    </div>
+                                )}
+                                <div className="min-h-[150px] px-6 text-sm sm:text-base text-gray-800 font-medium leading-relaxed whitespace-pre-wrap">
+                                    {conteudo || <span className="text-gray-400 italic font-bold">A tela está em branco...</span>}
+                                </div>
                             </div>
                         ) : (
-                            <textarea
-                                value={conteudo}
-                                onChange={e => setConteudo(e.target.value)}
-                                placeholder="Mande sua mensagem! Pode ser um aviso de falta, um evento no fds, ou até uma promo relâmpago 🥊..."
-                                rows={10}
-                                className="w-full p-6 text-sm sm:text-base text-gray-800 placeholder:text-gray-400 resize-none bg-transparent focus:outline-none leading-relaxed font-medium"
-                                autoFocus
-                            />
+                            <>
+                                <textarea
+                                    value={conteudo}
+                                    onChange={e => setConteudo(e.target.value)}
+                                    placeholder="Mande sua mensagem! Pode ser um aviso de falta, um evento no fds, ou até uma promo relâmpago 🥊..."
+                                    rows={8}
+                                    className="w-full px-6 pt-6 pb-2 text-sm sm:text-base text-gray-800 placeholder:text-gray-400 resize-none bg-transparent focus:outline-none leading-relaxed font-medium"
+                                    autoFocus
+                                />
+                                <div className="px-6 pb-4">
+                                    <input
+                                        type="url"
+                                        placeholder="Passe uma URL de imagem (Opcional)"
+                                        value={imagemUrl}
+                                        onChange={e => setImagemUrl(e.target.value)}
+                                        className="w-full text-xs font-bold text-gray-600 bg-gray-100/80 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:bg-white focus:border-[#CC0000] focus:ring-1 focus:ring-[#CC0000] transition-all"
+                                    />
+                                </div>
+                            </>
                         )}
                     </div>
 
