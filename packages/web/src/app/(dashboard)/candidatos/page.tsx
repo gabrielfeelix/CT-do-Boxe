@@ -5,7 +5,7 @@ import { useCandidatos } from '@/hooks/useCandidatos'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { Users, Filter } from 'lucide-react'
+import { Users, Filter, ChevronRight, Search } from 'lucide-react'
 import { formatDate } from '@/lib/utils/formatters'
 import Link from 'next/link'
 
@@ -28,126 +28,148 @@ export default function CandidatosPage() {
     const { candidatos, loading, total, pendentes } = useCandidatos({ status: statusFiltro })
 
     return (
-        <div className="space-y-6 max-w-[1440px] mx-auto pb-8 animate-in slide-in-from-bottom-2 duration-500">
-            {/* Header Premium */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
+        <div className="space-y-6 max-w-7xl mx-auto pb-8 animate-in slide-in-from-bottom-2 duration-300">
+            {/* Header SaaS Standard */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-5">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                        <Users className="w-6 h-6 text-[#CC0000]" /> Processo Seletivo
+                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+                        <Users className="w-6 h-6 text-[#CC0000]" /> Inscrições e Candidatos
                     </h2>
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">
-                        {loading ? 'Carregando...' : `${total} candidato${total !== 1 ? 's' : ''} na base`}
+                    <p className="text-sm text-gray-500 mt-1">
+                        Gerencie a fila de admissão e novos perfis ({total} total).
                     </p>
                 </div>
-                {pendentes > 0 && (
-                    <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-2.5 rounded-xl shadow-sm text-sm font-bold animate-pulse">
-                        <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
-                        </span>
-                        {pendentes} Aguardando Avaliação
-                    </div>
-                )}
             </div>
 
-            {/* Alerta de pendentes em card destacado */}
+            {/* Alerta de pendentes corporativo (sem blur chamativo) */}
             {pendentes > 0 && statusFiltro === 'todos' && !loading && (
-                <div className="bg-gradient-to-r from-yellow-50 to-amber-50/50 border border-yellow-200/60 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-400 blur-[80px] opacity-20 pointer-events-none" />
-                    <div className="bg-yellow-100 p-2.5 rounded-full shrink-0 relative z-10">
-                        <Users className="h-6 w-6 text-yellow-600" />
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-white p-2 rounded-md shadow-sm border border-amber-100">
+                            <Users className="h-5 w-5 text-amber-600" />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-bold text-amber-900">
+                                {pendentes} candidato{pendentes > 1 ? 's formaram' : ' formou'} uma fila de aprovação.
+                            </h4>
+                            <p className="text-sm text-amber-700">
+                                Revise os perfis antes de liberar o acesso ao sistema.
+                            </p>
+                        </div>
                     </div>
-                    <div className="relative z-10">
-                        <h4 className="text-base font-black text-yellow-900 tracking-tight">
-                            Ação Requirida: {pendentes} candidato{pendentes > 1 ? 's novos na fila' : ' novo na fila'}
-                        </h4>
-                        <p className="text-sm font-medium text-yellow-800/80 mt-0.5 leading-relaxed">
-                            Ninguém entra no CT sem a sua aprovação. Avalie as fichas de inscrição para criar as contas e liberar o app.
-                        </p>
-                    </div>
-                    <div className="relative z-10 sm:ml-auto w-full sm:w-auto mt-2 sm:mt-0">
-                        <button onClick={() => setStatusFiltro('aguardando')} className="w-full sm:w-auto px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-yellow-950 font-bold text-sm rounded-lg transition-colors shadow-sm">
-                            Avaliar Agora
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => setStatusFiltro('aguardando')}
+                        className="px-4 py-2 bg-white text-sm font-medium text-amber-900 border border-amber-300 hover:bg-amber-100 rounded-md shadow-sm transition-colors whitespace-nowrap"
+                    >
+                        Filtrar Pendentes
+                    </button>
                 </div>
             )}
 
-            {/* Filtros em Pílulas */}
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
-                <div className="flex items-center gap-2 bg-gray-50/50 p-1.5 rounded-2xl border border-gray-100 w-fit shrink-0">
+            {/* Barra de Filtros (Tabs Clean) */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                     {STATUS_OPTIONS.map(opt => (
                         <button
                             key={opt.value}
                             onClick={() => setStatusFiltro(opt.value)}
                             className={`
-                px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap flex items-center gap-2
-                ${statusFiltro === opt.value
-                                    ? 'bg-white text-gray-900 shadow-sm border border-gray-200/60'
-                                    : 'text-gray-500 hover:bg-gray-200/50 hover:text-gray-900 border border-transparent'
+                                px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap
+                                ${statusFiltro === opt.value
+                                    ? 'bg-gray-100 text-gray-900 shadow-sm'
+                                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
                                 }
-                `}
+                            `}
                         >
-                            {opt.value === 'aguardando' && <div className={`w-2 h-2 rounded-full ${statusFiltro === opt.value ? 'bg-yellow-400' : 'bg-gray-300'}`} />}
                             {opt.label}
                         </button>
                     ))}
                 </div>
-                <div className="h-6 w-px bg-gray-200 hidden sm:block mx-1" />
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest hidden sm:flex items-center gap-1.5 shrink-0"><Filter className="w-3.5 h-3.5" /> Filtros Rápidos</p>
+
+                <div className="relative">
+                    <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Buscar pelo nome..."
+                        className="w-full sm:w-64 pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#CC0000] focus:border-[#CC0000]"
+                    />
+                </div>
             </div>
 
-            {/* Lista */}
-            {loading ? <LoadingSpinner label="Buscando fichas do processo seletivo..." /> :
+            {/* Listagem em Formato de Data Table */}
+            {loading ? <div className="py-12"><LoadingSpinner label="Buscando fichas..." /></div> :
                 candidatos.length === 0 ? (
                     <EmptyState
                         icon={Users}
-                        title={statusFiltro === 'todos' ? "Nenhuma inscrição recebida" : "Sem candidatos nesta visão"}
-                        description={statusFiltro === 'todos' ? "Quando alguém tentar se inscrever pelo app, a solicitação aparecerá aqui." : "Altere o filtro acima para ver outras fichas."}
+                        title={statusFiltro === 'todos' ? "Nenhuma inscrição." : "Nenhum resultado."}
+                        description="Nenhum candidato encontrado nessa lista."
                     />
                 ) : (
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-50/80">
-                        {candidatos.map(c => (
-                            <Link
-                                href={`/candidatos/${c.id}`}
-                                key={c.id}
-                                className="flex flex-col sm:flex-row sm:items-center justify-between p-5 hover:bg-gray-50/80 transition-colors group cursor-pointer gap-4"
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-[#CC0000]/10 group-hover:text-[#CC0000] border border-gray-200 group-hover:border-[#CC0000]/20 transition-all shrink-0">
-                                        <Users className="w-5 h-5" />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <p className="text-base font-black text-gray-900 group-hover:text-[#CC0000] transition-colors leading-tight">{c.nome}</p>
-                                            {c.status === 'aguardando' && <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse shadow-sm" title="Aguardando Avaliação" />}
-                                        </div>
-                                        <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{c.email}</p>
-                                            {c.telefone && <p className="text-xs font-bold text-gray-400 uppercase tracking-widest block sm:inline-block border-l border-gray-200 pl-3">{c.telefone}</p>}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between sm:justify-end gap-6 sm:pl-4 border-t sm:border-t-0 sm:border-l border-gray-100 pt-3 sm:pt-0 mt-2 sm:mt-0">
-                                    <div className="hidden md:block text-right">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Nível Informado</p>
-                                        <p className="text-sm font-bold text-gray-800">{EXPERIENCIA_LABELS[c.experiencia_previa ?? ''] ?? '—'}</p>
-                                    </div>
-                                    <div className="hidden lg:block text-right">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Aplicou em</p>
-                                        <p className="text-sm font-bold text-gray-700">{formatDate(c.created_at).slice(0, 5)} as {new Date(c.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
-                                    </div>
-
-                                    <div className="shrink-0 flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                                        <StatusBadge status={c.status} />
-                                        <div className="bg-white border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 group-hover:border-gray-300 group-hover:bg-gray-50 transition-colors shadow-sm ml-2">
-                                            {c.status === 'aguardando' ? 'Avaliar Ficha →' : 'Ver Detalhes →'}
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
+                    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200 text-left">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Candidato / Contato</th>
+                                        <th scope="col" className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Inscrição</th>
+                                        <th scope="col" className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nível</th>
+                                        <th scope="col" className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th scope="col" className="relative px-6 py-4">
+                                            <span className="sr-only">Ações</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {candidatos.map((c) => (
+                                        <tr key={c.id} className="hover:bg-gray-50/50 transition-colors group">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <div className="ml-0">
+                                                        <div className="text-sm font-medium text-gray-900 group-hover:text-[#CC0000] transition-colors flex items-center gap-2">
+                                                            {c.nome}
+                                                            {c.status === 'aguardando' && (
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title="Aguardando Avaliação"></span>
+                                                            )}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mt-0.5">
+                                                            {c.email} {c.telefone && `• ${c.telefone}`}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">{formatDate(c.created_at).slice(0, 5)}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-500">
+                                                    {EXPERIENCIA_LABELS[c.experiencia_previa ?? ''] ?? 'N/A'}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <StatusBadge status={c.status} />
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <Link
+                                                    href={`/candidatos/${c.id}`}
+                                                    className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-900 bg-white border border-gray-200 rounded-md px-3 py-1.5 shadow-sm transition-colors"
+                                                >
+                                                    Visualizar
+                                                    <ChevronRight className="w-4 h-4" />
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        {/* Fake Pagination Footer */}
+                        <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between text-sm text-gray-500">
+                            <div>Mostrando 1 a {candidatos.length} de {total} resultados</div>
+                            <div className="flex gap-2">
+                                <button disabled className="px-3 py-1 bg-white border border-gray-200 rounded text-gray-400">Anterior</button>
+                                <button disabled className="px-3 py-1 bg-white border border-gray-200 rounded text-gray-400">Próxima</button>
+                            </div>
+                        </div>
                     </div>
                 )
             }
