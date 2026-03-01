@@ -43,3 +43,8 @@ Thumbs.db
 *.pem
 .vercel
 .turbo
+
+# Archive & old repos
+_archive/
+ct-boxe-web/
+ct-boxe-app/

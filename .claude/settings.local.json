@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(test:*)",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(ipconfig:*)",
+      "Bash(cmd.exe /c ipconfig)",
+      "Bash(netsh interface show interface:*)",
+      "Bash(netsh wlan show:*)",
+      "Bash(ping:*)",
+      "Bash(tasklist:*)",
+      "Bash(powershell.exe -Command \"ipconfig /flushdns\")",
+      "Bash(powershell.exe -Command \"ipconfig /release\")",
+      "Bash(powershell.exe -Command \"ipconfig /renew\")",
+      "Bash(powershell.exe -Command \"Get-Process chrome | Sort-Object WorkingSet -Descending | Select-Object -First 10 Id,@{Name=''MemMB'';Expression={[math]::Round\\($_.WorkingSet/1MB,1\\)}},ProcessName | Format-Table\")",
+      "Bash(/plugin install:*)",
+      "Bash(cmd.exe /c start http://localhost:3000)",
+      "Bash(claude plugin list:*)",
+      "Bash(npx tsx:*)",
+      "Bash(git branch:*)",
+      "Bash(npm --version:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm:*)",
+      "Bash(powershell -Command \"if \\(!\\(Test-Path -Path $PROFILE\\)\\) { New-Item -ItemType File -Path $PROFILE -Force | Out-Null }; echo $PROFILE\")",
+      "Bash(powershell -Command \". $PROFILE\")",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(node -e:*)",
+      "Bash(npx --no-install tsc:*)",
+      "Bash(npx expo start:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}

@@ -2,7 +2,7 @@ import '../global.css'
 
 import { Feather, FontAwesome5 } from '@expo/vector-icons'
 import { Stack, usePathname, useRouter } from 'expo-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Alert, Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
@@ -39,9 +39,6 @@ function AppLayoutShell() {
         pathname === '/pagamento' || pathname === '/dados-cadastrais' || pathname === '/auth/login'
 
     const showBlocker = Boolean(session && isBloqueado && !isEscapeRoute)
-
-    const vencimentoLabel = useMemo(() => toBRDate(contrato.data_vencimento), [contrato.data_vencimento])
-    const valorLabel = useMemo(() => toCurrencyBRL(contrato.valor), [contrato.valor])
 
     const handleRenovarClick = () => {
         router.push('/pagamento')
@@ -148,13 +145,13 @@ function AppLayoutShell() {
                                         <Text className="text-xs font-bold uppercase tracking-widest text-white/60">
                                             Valor Pendente
                                         </Text>
-                                        <Text className="text-xl font-black text-white">{valorLabel}</Text>
+                                        <Text className="text-xl font-black text-white">{toCurrencyBRL(contrato.valor)}</Text>
                                     </View>
                                     <View className="flex-row items-center justify-between">
                                         <Text className="text-xs font-bold uppercase tracking-widest text-white/60">
                                             Vencimento
                                         </Text>
-                                        <Text className="text-md font-bold text-white">{vencimentoLabel}</Text>
+                                        <Text className="text-md font-bold text-white">{toBRDate(contrato.data_vencimento)}</Text>
                                     </View>
                                 </View>
 
