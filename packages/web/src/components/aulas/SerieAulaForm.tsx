@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { serieAulaSchema, type SerieAulaValues } from '@/lib/validations/serie-aula'
+import { useProfessoresSelect } from '@/hooks/useProfessores'
 
 interface SerieAulaFormProps {
     initialValues?: Partial<SerieAulaValues>
@@ -56,6 +57,7 @@ export function SerieAulaForm({
         data_fim: initialValues?.data_fim ?? '',
     })
     const [errors, setErrors] = useState<Erros>({})
+    const { professores: listaProfessores, loading: loadingProfs } = useProfessoresSelect()
 
     const duracaoMinutos = useMemo(() => {
         const [inicioHora, inicioMinuto] = values.hora_inicio.split(':').map(Number)
@@ -130,12 +132,24 @@ export function SerieAulaForm({
 
                     <div>
                         <label className="mb-1.5 block text-sm font-semibold text-gray-700">Professor</label>
-                        <input
-                            type="text"
-                            value={values.professor}
-                            onChange={(event) => setValues((prev) => ({ ...prev, professor: event.target.value }))}
-                            className="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-300 focus:border-[#CC0000] focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20"
-                        />
+                        {!loadingProfs && listaProfessores.length > 0 ? (
+                            <select
+                                value={values.professor}
+                                onChange={(event) => setValues((prev) => ({ ...prev, professor: event.target.value }))}
+                                className="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-300 focus:border-[#CC0000] focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 cursor-pointer"
+                            >
+                                {listaProfessores.map(p => (
+                                    <option key={p.id} value={p.nome}>{p.nome}{p.role === 'super_admin' ? ' ★' : ''}</option>
+                                ))}
+                            </select>
+                        ) : (
+                            <input
+                                type="text"
+                                value={values.professor}
+                                onChange={(event) => setValues((prev) => ({ ...prev, professor: event.target.value }))}
+                                className="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-300 focus:border-[#CC0000] focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20"
+                            />
+                        )}
                         {errors.professor && (
                             <p className="mt-1 text-xs font-semibold text-red-600">{errors.professor}</p>
                         )}

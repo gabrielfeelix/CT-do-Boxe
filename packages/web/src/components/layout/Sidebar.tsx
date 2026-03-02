@@ -11,19 +11,23 @@ import {
     Calendar,
     CheckSquare,
     Rss,
-    PlaySquare,
+    Play,
     Bell,
     Settings,
     LogOut,
     ClipboardList,
     Timer,
     BarChart2,
+    ShieldCheck,
+    GraduationCap,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { ROUTES } from '@/constants/routes'
 import { useCandidatos } from '@/hooks/useCandidatos'
 import { useAvaliacoesPendentes } from '@/hooks/useAvaliacoes'
+import { useProfessoresSelect } from '@/hooks/useProfessores'
+import { useEffect, useState } from 'react'
 
 function cn(...classes: (string | boolean | undefined)[]) {
     return classes.filter(Boolean).join(' ')
@@ -40,7 +44,7 @@ const navItems = [
     { label: 'Aulas', href: ROUTES.AULAS, icon: Calendar },
     { label: 'Presença', href: ROUTES.PRESENCA, icon: CheckSquare },
     { label: 'Feed', href: ROUTES.FEED, icon: Rss },
-    { label: 'Trilhas & Vídeos', href: ROUTES.STORIES, icon: PlaySquare },
+    { label: 'Stories', href: ROUTES.STORIES, icon: Play },
     { label: 'Relatórios', href: '/relatorios', icon: BarChart2 },
     { label: 'Notificações', href: ROUTES.NOTIFICACOES, icon: Bell },
     { label: 'Configurações', href: ROUTES.CONFIGURACOES, icon: Settings },
@@ -52,6 +56,24 @@ export function Sidebar() {
     const supabase = createClient()
     const { pendentes: pendentesCandidatos } = useCandidatos()
     const { avaliacoes: pendentesAvaliacoes } = useAvaliacoesPendentes()
+    const { professores } = useProfessoresSelect()
+    const [userEmail, setUserEmail] = useState<string | null>(null)
+
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => {
+            setUserEmail(data.user?.email ?? null)
+        })
+    }, [supabase])
+
+    // Match logged user with professor profile via email, fallback para primeiro
+    const profAtual = professores.find(p => p.nome?.toLowerCase().includes('argel'))
+        ?? professores[0]
+        ?? null
+
+    const nomeExibido = profAtual?.nome ?? (userEmail?.split('@')[0] ?? 'Administrador')
+    const roleExibido = profAtual?.role === 'super_admin' ? 'Admin Master' : 'Professor'
+    const corPerfil = profAtual?.cor_perfil ?? '#CC0000'
+    const iniciais = nomeExibido.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()
 
     async function handleLogout() {
         await supabase.auth.signOut()
@@ -112,8 +134,28 @@ export function Sidebar() {
                 </ul>
             </nav>
 
-            {/* Logout */}
-            <div className="border-t border-gray-100 p-3">
+            {/* Usuário logado + Logout */}
+            <div className="border-t border-gray-100 px-3 py-3 space-y-1">
+                {/* Card perfil */}
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 border border-gray-100 px-3 py-2.5">
+                    <div
+                        className="h-8 w-8 shrink-0 rounded-xl flex items-center justify-center text-white text-[11px] font-black shadow-sm"
+                        style={{ background: corPerfil }}
+                    >
+                        {iniciais}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-xs font-black text-gray-900 truncate leading-tight">{nomeExibido}</p>
+                        <p className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                            {profAtual?.role === 'super_admin'
+                                ? <><ShieldCheck className="h-2.5 w-2.5 text-amber-500" /> {roleExibido}</>
+                                : <><GraduationCap className="h-2.5 w-2.5 text-blue-400" /> {roleExibido}</>
+                            }
+                        </p>
+                    </div>
+                </div>
+
+                {/* Logout */}
                 <button
                     onClick={handleLogout}
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 cursor-pointer"
