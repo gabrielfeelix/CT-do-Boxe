@@ -81,13 +81,21 @@ export async function POST(req: NextRequest) {
             .select('aluno_id, contrato_id')
             .single()
 
+        // Se pagamento aprovado, ativa o contrato vinculado (se houver)
+        if (pagamento?.contrato_id) {
+            await supabase
+                .from('contratos')
+                .update({ status: 'ativo' })
+                .eq('id', pagamento.contrato_id)
+        }
+
         // Se pagamento aprovado, garante que aluno está ativo
         if (pagamento?.aluno_id) {
             await supabase
                 .from('alunos')
                 .update({ status: 'ativo' })
                 .eq('id', pagamento.aluno_id)
-                .eq('status', 'bloqueado') // só desbloqueia se estava bloqueado por inadimplência
+            // Se estava inativo, aguardando ou bloqueado, agora está pagante e ativo.
         }
 
         return NextResponse.json({ received: true })

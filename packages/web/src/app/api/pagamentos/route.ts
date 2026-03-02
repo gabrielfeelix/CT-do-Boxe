@@ -77,8 +77,14 @@ export async function POST(req: NextRequest) {
             mercadopago_id: mpResponse.id,
             status: mpResponse.status,
         })
-    } catch (err) {
-        console.error('Erro ao gerar cobrança MP:', err)
-        return NextResponse.json({ error: 'Erro ao gerar cobrança.' }, { status: 500 })
+    } catch (err: any) {
+        console.error('❌ [API PIX] Erro ao gerar cobrança MP:', err)
+        // Se for erro do MP, detalha no log
+        if (err.cause) console.error('🔍 Causa detalhada:', err.cause)
+
+        return NextResponse.json({
+            error: 'Erro ao gerar cobrança.',
+            details: err.message || 'Erro interno.'
+        }, { status: 500 })
     }
 }

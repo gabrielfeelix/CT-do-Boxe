@@ -27,6 +27,7 @@ import { ROUTES } from '@/constants/routes'
 import { useCandidatos } from '@/hooks/useCandidatos'
 import { useAvaliacoesPendentes } from '@/hooks/useAvaliacoes'
 import { useProfessoresSelect } from '@/hooks/useProfessores'
+import { useNotificacoes } from '@/hooks/useNotificacoes'
 import { useEffect, useState } from 'react'
 
 function cn(...classes: (string | boolean | undefined)[]) {
@@ -35,19 +36,17 @@ function cn(...classes: (string | boolean | undefined)[]) {
 
 const navItems = [
     { label: 'Dashboard', href: ROUTES.DASHBOARD, icon: LayoutDashboard },
-    { label: 'Timer de Rounds', href: '/timer', icon: Timer },
+    { label: 'Presença', href: ROUTES.PRESENCA, icon: CheckSquare },
+    { label: 'Aulas', href: ROUTES.AULAS, icon: Calendar },
     { label: 'Alunos', href: ROUTES.ALUNOS, icon: Users },
     { label: 'Candidatos', href: ROUTES.CANDIDATOS, icon: UserCheck },
-    { label: 'Avaliações', href: '/avaliacoes', icon: ClipboardList },
     { label: 'Contratos', href: ROUTES.CONTRATOS, icon: FileText },
-    { label: 'Financeiro', href: ROUTES.FINANCEIRO, icon: DollarSign },
-    { label: 'Aulas', href: ROUTES.AULAS, icon: Calendar },
-    { label: 'Presença', href: ROUTES.PRESENCA, icon: CheckSquare },
+    { label: 'Financeiro', href: ROUTES.FINANCEIRO, icon: DollarSign, adminOnly: true },
+    { label: 'Professores', href: '/professores', icon: GraduationCap, adminOnly: true },
     { label: 'Feed', href: ROUTES.FEED, icon: Rss },
     { label: 'Stories', href: ROUTES.STORIES, icon: Play },
-    { label: 'Relatórios', href: '/relatorios', icon: BarChart2 },
     { label: 'Notificações', href: ROUTES.NOTIFICACOES, icon: Bell },
-    { label: 'Configurações', href: ROUTES.CONFIGURACOES, icon: Settings },
+    { label: 'Relatórios', href: '/relatorios', icon: BarChart2, adminOnly: true },
 ]
 
 export function Sidebar() {
@@ -56,6 +55,7 @@ export function Sidebar() {
     const supabase = createClient()
     const { pendentes: pendentesCandidatos } = useCandidatos()
     const { avaliacoes: pendentesAvaliacoes } = useAvaliacoesPendentes()
+    const { naoLidas: totalNotificacoes } = useNotificacoes()
     const { professores } = useProfessoresSelect()
     const [userEmail, setUserEmail] = useState<string | null>(null)
 
@@ -65,13 +65,16 @@ export function Sidebar() {
         })
     }, [supabase])
 
-    // Match logged user with professor profile via email, fallback para primeiro
-    const profAtual = professores.find(p => p.nome?.toLowerCase().includes('argel'))
+    // Match logged user with professor profile via email
+    const profAtual = professores.find(p => p.email?.toLowerCase() === userEmail?.toLowerCase())
+        ?? professores.find(p => p.nome?.toLowerCase().includes('argel'))
         ?? professores[0]
         ?? null
 
+    const isAdmin = profAtual?.role === 'super_admin'
+
     const nomeExibido = profAtual?.nome ?? (userEmail?.split('@')[0] ?? 'Administrador')
-    const roleExibido = profAtual?.role === 'super_admin' ? 'Admin Master' : 'Professor'
+    const roleExibido = isAdmin ? 'Admin Master' : 'Professor'
     const corPerfil = profAtual?.cor_perfil ?? '#CC0000'
     const iniciais = nomeExibido.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()
 
@@ -96,6 +99,9 @@ export function Sidebar() {
             <nav className="flex-1 overflow-y-auto px-3 py-3">
                 <ul className="space-y-0.5">
                     {navItems.map((item) => {
+                        // Se for um item de Admin e o usuário não for Super Admin, não mostrar
+                        if (item.adminOnly && !isAdmin) return null
+
                         const Icon = item.icon
                         const isActive =
                             item.href === '/dashboard'
@@ -126,6 +132,11 @@ export function Sidebar() {
                                                 {pendentesAvaliacoes.length}
                                             </span>
                                         )}
+                                        {item.label === 'Notificações' && totalNotificacoes > 0 && (
+                                            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 text-white text-xs font-bold px-1.5 shadow-sm ml-2 animate-pulse">
+                                                {totalNotificacoes}
+                                            </span>
+                                        )}
                                     </div>
                                 </Link>
                             </li>
@@ -133,37 +144,6 @@ export function Sidebar() {
                     })}
                 </ul>
             </nav>
-
-            {/* Usuário logado + Logout */}
-            <div className="border-t border-gray-100 px-3 py-3 space-y-1">
-                {/* Card perfil */}
-                <div className="flex items-center gap-3 rounded-xl bg-gray-50 border border-gray-100 px-3 py-2.5">
-                    <div
-                        className="h-8 w-8 shrink-0 rounded-xl flex items-center justify-center text-white text-[11px] font-black shadow-sm"
-                        style={{ background: corPerfil }}
-                    >
-                        {iniciais}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-xs font-black text-gray-900 truncate leading-tight">{nomeExibido}</p>
-                        <p className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
-                            {profAtual?.role === 'super_admin'
-                                ? <><ShieldCheck className="h-2.5 w-2.5 text-amber-500" /> {roleExibido}</>
-                                : <><GraduationCap className="h-2.5 w-2.5 text-blue-400" /> {roleExibido}</>
-                            }
-                        </p>
-                    </div>
-                </div>
-
-                {/* Logout */}
-                <button
-                    onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 cursor-pointer"
-                >
-                    <LogOut className="h-4 w-4" />
-                    Sair
-                </button>
-            </div>
         </aside>
     )
 }

@@ -1,14 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { PenSquare, Heart, MessageCircle, Trash2, EyeOff, LayoutTemplate, ShieldCheck, GraduationCap } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { PenSquare, Heart, MessageCircle, Trash2, EyeOff, LayoutTemplate, ShieldCheck, GraduationCap, Search } from 'lucide-react'
 import { useFeed } from '@/hooks/useFeed'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useProfessoresSelect } from '@/hooks/useProfessores'
+
+import { FeedComposer } from '@/components/feed/FeedComposer'
+import { ConfirmModal } from '@/components/shared/ConfirmModal'
 
 function tempoRelativo(data: string): string {
     const diff = Date.now() - new Date(data).getTime()
@@ -22,19 +26,40 @@ function tempoRelativo(data: string): string {
 
 export default function FeedPage() {
     const { posts, loading, refetch } = useFeed()
+    const router = useRouter()
     const supabase = createClient()
     const [excluindo, setExcluindo] = useState<string | null>(null)
+    const [postParaExcluir, setPostParaExcluir] = useState<{ id: string, conteudo: string } | null>(null)
+    const [busca, setBusca] = useState('')
+    const [filtroProfessor, setFiltroProfessor] = useState('todos')
     const { professores } = useProfessoresSelect()
+    const [userEmail, setUserEmail] = useState<string | null>(null)
 
-    async function excluirPost(id: string, conteudo: string) {
-        const preview = conteudo.slice(0, 40) + (conteudo.length > 40 ? '...' : '')
-        if (!confirm(`Tem certeza que deseja excluir esta publicação?\n\n"${preview}"`)) return
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => {
+            setUserEmail(data.user?.email ?? null)
+        })
+    }, [supabase])
 
-        setExcluindo(id)
-        const { error } = await supabase.from('posts').delete().eq('id', id)
-        if (error) toast.error('Falha de sincronia ao excluir.')
-        else { toast.success('Publicação excluída com sucesso.'); refetch() }
+    const profAtual = professores.find(p => p.email?.toLowerCase() === userEmail?.toLowerCase())
+        ?? professores.find(p => p.nome?.toLowerCase().includes('argel'))
+        ?? (professores.length > 0 ? professores[0] : null)
+
+    async function handleExcluirPost() {
+        if (!postParaExcluir) return
+
+        setExcluindo(postParaExcluir.id)
+        const { error } = await supabase.from('posts').delete().eq('id', postParaExcluir.id)
+
+        if (error) {
+            toast.error('Falha de sincronia ao excluir.')
+        } else {
+            toast.success('Publicação excluída com sucesso.')
+            refetch()
+        }
+
         setExcluindo(null)
+        setPostParaExcluir(null)
     }
 
     async function togglePublicado(id: string, publicadoAtual: boolean) {
@@ -46,26 +71,57 @@ export default function FeedPage() {
         }
     }
 
+    const postsFiltrados = posts.filter(post => {
+        const matchesBusca =
+            post.conteudo.toLowerCase().includes(busca.toLowerCase()) ||
+            post.autor.toLowerCase().includes(busca.toLowerCase());
+        const matchesProfessor = filtroProfessor === 'todos' || post.autor === filtroProfessor;
+        return matchesBusca && matchesProfessor;
+    })
+
     return (
         <div className="space-y-6 max-w-3xl mx-auto pb-12 animate-in slide-in-from-bottom-2 duration-500">
 
             {/* Premium Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
-                <div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                        <LayoutTemplate className="w-6 h-6 text-[#CC0000]" /> Feed do CT
-                    </h2>
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">
-                        {loading ? 'Carregando publicações...' : `Comunicados publicados para os alunos`}
-                    </p>
+            <div className="flex flex-col gap-6 border-b border-gray-100 pb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+                            <LayoutTemplate className="w-6 h-6 text-[#CC0000]" /> Feed do CT
+                        </h2>
+                        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">
+                            {loading ? 'Carregando publicações...' : `Comunicados compartilhados com a nossa equipe`}
+                        </p>
+                    </div>
                 </div>
-                <Link
-                    href="/feed/novo"
-                    className="bg-gray-900 hover:bg-black text-white text-sm font-bold uppercase tracking-widest px-6 py-3 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-2 max-w-fit"
-                >
-                    <PenSquare className="h-4 w-4" /> + Novo comunicado
-                </Link>
+
+                {/* Filtros e Busca */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1 relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Buscar no feed..."
+                            className="w-full h-11 bg-white border border-gray-200 rounded-xl pl-10 pr-4 text-sm font-medium outline-none focus:bg-white focus:border-[#CC0000] focus:ring-2 focus:ring-[#CC0000]/10 transition-all text-gray-900 shadow-sm"
+                            value={busca}
+                            onChange={(e) => setBusca(e.target.value)}
+                        />
+                    </div>
+                    <select
+                        className="h-11 bg-white border border-gray-200 rounded-xl px-4 text-sm font-bold text-gray-700 outline-none focus:bg-white focus:border-[#CC0000] focus:ring-2 focus:ring-[#CC0000]/10 transition-all cursor-pointer shadow-sm"
+                        value={filtroProfessor}
+                        onChange={(e) => setFiltroProfessor(e.target.value)}
+                    >
+                        <option value="todos">Todos os Autores</option>
+                        {professores.map(p => (
+                            <option key={p.id} value={p.nome}>{p.nome}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
+
+            {/* Composer estilo Social */}
+            <FeedComposer professorAtual={profAtual} onSuccess={refetch} />
 
             {loading ? <LoadingSpinner label="Puxando fios da linha do tempo..." /> :
                 posts.length === 0 ? (
@@ -73,31 +129,23 @@ export default function FeedPage() {
                         icon={PenSquare}
                         title="Sua Linha do Tempo está Vazia"
                         description="Compartilhe com seus alunos! Lance o primeiro comunicado e traga vida ao app."
-                        action={{ label: 'Criar Minha Primeira Postagem', onClick: () => window.location.href = '/feed/novo' }}
+                        action={{ label: 'Entendido!', onClick: () => { } }}
+                    />
+                ) : postsFiltrados.length === 0 ? (
+                    <EmptyState
+                        icon={LayoutTemplate}
+                        title="Nenhum resultado"
+                        description="Não encontramos publicações para os filtros selecionados."
+                        action={{ label: 'Limpar Filtros', onClick: () => { setBusca(''); setFiltroProfessor('todos'); } }}
                     />
                 ) : (
                     <div className="space-y-6">
-                        {posts.map(post => (
+                        {postsFiltrados.map(post => (
                             <div
                                 key={post.id}
                                 className={`bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 relative ${!post.publicado ? 'bg-gray-50/50 border-dashed opacity-80' : 'hover:shadow'}`}
                             >
-                                {!post.publicado && (
-                                    <div className="absolute top-4 right-4 z-10">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-[#CC0000] bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg flex items-center shadow-sm backdrop-blur-sm gap-1.5">
-                                            <EyeOff className="h-3 w-3" /> Arquivado
-                                        </span>
-                                    </div>
-                                )}
-
-                                {post.imagem_url && (
-                                    <div className="w-full aspect-video sm:aspect-[21/9] relative overflow-hidden bg-gray-100 group">
-                                        <img src={post.imagem_url} alt="Feed media" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                    </div>
-                                )}
-
-                                <div className="p-6 sm:p-8">
+                                <div className="p-5 sm:p-6">
                                     {/* Header do post - Professor info */}
                                     {(() => {
                                         const iniciais = (post.autor ?? '').split(' ').slice(0, 2).map((n: string) => n[0] ?? '').join('').toUpperCase()
@@ -105,30 +153,45 @@ export default function FeedPage() {
                                         const cor = profInfo?.cor_perfil ?? '#CC0000'
                                         const isAdmin = profInfo?.role === 'super_admin'
                                         return (
-                                            <div className="flex items-center gap-3 mb-5">
+                                            <div className="flex items-center gap-3 mb-4">
                                                 <div
-                                                    className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl flex items-center justify-center text-white text-sm font-black shadow-md shrink-0 relative"
+                                                    className="h-10 w-10 rounded-xl flex items-center justify-center text-white text-xs font-black shadow-sm shrink-0 relative"
                                                     style={{ background: cor }}
                                                 >
                                                     {iniciais}
-                                                    {post.publicado && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />}
+                                                    {post.publicado && <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />}
                                                 </div>
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-0.5">
-                                                        <p className="text-sm sm:text-base font-black text-gray-900 tracking-tight leading-none">{post.autor}</p>
+                                                        <p className="text-sm font-black text-gray-900 tracking-tight leading-none">{post.autor}</p>
                                                         {isAdmin
-                                                            ? <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 border border-amber-200 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-amber-700"><ShieldCheck className="h-2.5 w-2.5" /> Admin</span>
-                                                            : profInfo && <span className="inline-flex items-center gap-0.5 rounded-full bg-blue-50 border border-blue-200 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-blue-700"><GraduationCap className="h-2.5 w-2.5" /> Professor</span>
+                                                            ? <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 border border-amber-200 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest text-amber-700">Admin</span>
+                                                            : profInfo && <span className="inline-flex items-center gap-0.5 rounded-full bg-blue-50 border border-blue-200 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest text-blue-700">Professor</span>
                                                         }
                                                     </div>
-                                                    <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest">{tempoRelativo(post.created_at)}</p>
+                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{tempoRelativo(post.created_at)}</p>
                                                 </div>
                                             </div>
                                         )
                                     })()}
 
-                                    {/* Conteúdo */}
-                                    <p className="text-sm sm:text-base text-gray-700 font-medium leading-relaxed whitespace-pre-wrap">{post.conteudo}</p>
+                                    {/* Conteúdo do Texto */}
+                                    <p className="text-sm sm:text-[15px] text-gray-800 font-medium leading-relaxed whitespace-pre-wrap mb-4">{post.conteudo}</p>
+                                </div>
+
+                                {/* Imagem do Post (Agora abaixo do texto) */}
+                                {post.imagem_url && (
+                                    <div className="w-full relative bg-gray-50 border-y border-gray-50">
+                                        <img
+                                            src={post.imagem_url}
+                                            alt="Feed media"
+                                            className="w-full h-auto max-h-[600px] object-contain mx-auto"
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="px-5 sm:px-6 pb-5">
+                                    {/* Stats + Ações Reais */}
 
                                     {/* Stats + Ações Reais */}
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-6 pt-5 border-t border-gray-100 gap-4">
@@ -156,7 +219,7 @@ export default function FeedPage() {
                                                 {post.publicado ? 'Arquivar' : 'Re-publicar'}
                                             </button>
                                             <button
-                                                onClick={() => excluirPost(post.id, post.conteudo)}
+                                                onClick={() => setPostParaExcluir({ id: post.id, conteudo: post.conteudo })}
                                                 disabled={excluindo === post.id}
                                                 className="p-2.5 bg-gray-50 text-gray-400 border border-gray-100 hover:text-[#CC0000] hover:bg-red-50 hover:border-red-100 rounded-xl transition-all shadow-sm flex-shrink-0"
                                                 title="Apagar Matriz"
@@ -172,6 +235,18 @@ export default function FeedPage() {
                     </div>
                 )
             }
+
+            <ConfirmModal
+                isOpen={Boolean(postParaExcluir)}
+                onClose={() => setPostParaExcluir(null)}
+                onConfirm={handleExcluirPost}
+                title="Excluir Publicação"
+                description={`Tem certeza que deseja apagar permanentemente esta publicação? Esta ação não pode ser desfeita.\n\n"${postParaExcluir?.conteudo.slice(0, 60)}${(postParaExcluir?.conteudo.length ?? 0) > 60 ? '...' : ''}"`}
+                confirmText="Excluir Agora"
+                cancelText="Manter Post"
+                variant="danger"
+                isLoading={excluindo !== null}
+            />
         </div>
     )
 }

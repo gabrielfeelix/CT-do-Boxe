@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { UserPlus, Users, ChevronRight } from 'lucide-react'
+import { UserPlus, Users, ChevronRight, FileSpreadsheet } from 'lucide-react'
 import { useAlunos } from '@/hooks/useAlunos'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { AvatarInitials } from '@/components/shared/AvatarInitials'
@@ -11,6 +11,7 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { formatDate } from '@/lib/utils/formatters'
 import { useRouter } from 'next/navigation'
+import { ModalImportacaoLote } from '@/components/alunos/ModalImportacaoLote'
 
 const STATUS_OPTIONS = [
     { value: 'todos', label: 'Todos' },
@@ -24,8 +25,9 @@ export default function AlunosPage() {
     const router = useRouter()
     const [busca, setBusca] = useState('')
     const [statusFiltro, setStatusFiltro] = useState('todos')
+    const [isLoteOpen, setIsLoteOpen] = useState(false)
 
-    const { alunos, loading, error, total } = useAlunos({
+    const { alunos, loading, error, total, refetch } = useAlunos({
         busca,
         status: statusFiltro,
     })
@@ -40,13 +42,23 @@ export default function AlunosPage() {
                         {loading ? 'Buscando...' : `${total} aluno${total !== 1 ? 's' : ''} registrado${total !== 1 ? 's' : ''}`}
                     </p>
                 </div>
-                <Link
-                    href="/alunos/novo"
-                    className="flex items-center gap-2 bg-[#CC0000] hover:bg-[#AA0000] text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-200"
-                >
-                    <UserPlus className="h-4 w-4" />
-                    Novo aluno
-                </Link>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setIsLoteOpen(true)}
+                        className="flex items-center gap-2 bg-gray-50 border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-gray-700 hover:text-emerald-700 text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm hover:shadow transition-all duration-200"
+                        title="Importação em Lote"
+                    >
+                        <FileSpreadsheet className="h-4 w-4" />
+                        Lote
+                    </button>
+                    <Link
+                        href="/alunos/novo"
+                        className="flex items-center gap-2 bg-[#CC0000] hover:bg-[#AA0000] text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-md shadow-red-500/10 transition-all duration-200"
+                    >
+                        <UserPlus className="h-4 w-4" />
+                        Novo Aluno
+                    </Link>
+                </div>
             </div>
 
             {/* Filtros */}
@@ -166,6 +178,11 @@ export default function AlunosPage() {
                     </table>
                 </div>
             )}
+            <ModalImportacaoLote
+                isOpen={isLoteOpen}
+                onClose={() => setIsLoteOpen(false)}
+                onSuccess={refetch}
+            />
         </div>
     )
 }

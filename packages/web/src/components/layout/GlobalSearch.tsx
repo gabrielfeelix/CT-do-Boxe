@@ -136,7 +136,7 @@ export function GlobalSearch() {
     }
 
     return (
-        <div ref={wrapperRef} className="relative w-full max-w-sm ml-auto z-50">
+        <div ref={wrapperRef} className="relative w-full max-w-[320px] ml-auto z-50">
             {/* Input Wrapper */}
             <div className="relative flex items-center">
                 <Search className="absolute left-3 w-4 h-4 text-gray-400" />
@@ -149,7 +149,7 @@ export function GlobalSearch() {
                         setOpen(true)
                     }}
                     onFocus={() => setOpen(true)}
-                    placeholder="Busque por ID, nome, contrato, etc. (Cmd+K)"
+                    placeholder="Busque por ID, nome, etc."
                     className="w-full h-10 pl-9 pr-10 text-sm bg-gray-50/80 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20 focus:border-[#CC0000] transition-all font-medium text-gray-800 placeholder:text-gray-400 shadow-sm"
                 />
                 {loading && (

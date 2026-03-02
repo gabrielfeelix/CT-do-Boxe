@@ -287,8 +287,8 @@ export default function AlunoDetalhePage() {
                                     <h2 className="text-3xl font-black text-white tracking-tight drop-shadow-sm">{aluno.nome}</h2>
                                     <StatusBadge status={aluno.status} />
                                 </div>
-                                <p className="text-sm font-bold text-gray-300 uppercase tracking-widest flex items-center gap-2">
-                                    Membro Desde <span className="bg-white/10 text-white px-2.5 py-1 rounded-md backdrop-blur-sm">{formatDate(aluno.data_cadastro || aluno.created_at)}</span>
+                                <p className="text-[xs] font-black text-rose-100 uppercase tracking-[0.15em] flex items-center gap-2">
+                                    Membro Desde <span className="bg-[#CC0000] text-white px-2.5 py-1 rounded-md text-[13px] font-black shadow-lg border border-red-400/30">{formatDate(aluno.data_cadastro || aluno.created_at)}</span>
                                 </p>
                             </div>
 

@@ -5,9 +5,10 @@ import { useCandidatos } from '@/hooks/useCandidatos'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { Users, Filter, ChevronRight, Search } from 'lucide-react'
+import { Users, Filter, ChevronRight, Search, Plus } from 'lucide-react'
 import { formatDate } from '@/lib/utils/formatters'
 import Link from 'next/link'
+import { ModalNovoCandidato } from '@/components/candidatos/ModalNovoCandidato'
 
 const STATUS_OPTIONS = [
     { value: 'todos', label: 'Todos' },
@@ -25,7 +26,8 @@ const EXPERIENCIA_LABELS: Record<string, string> = {
 
 export default function CandidatosPage() {
     const [statusFiltro, setStatusFiltro] = useState('todos')
-    const { candidatos, loading, total, pendentes } = useCandidatos({ status: statusFiltro })
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const { candidatos, loading, total, pendentes, refetch } = useCandidatos({ status: statusFiltro })
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto pb-8 animate-in slide-in-from-bottom-2 duration-300">
@@ -39,6 +41,13 @@ export default function CandidatosPage() {
                         Gerencie a fila de admissão e novos perfis ({total} total).
                     </p>
                 </div>
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center gap-2 bg-[#CC0000] hover:bg-[#AA0000] text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-red-500/10 transition-all active:scale-95"
+                >
+                    <Plus className="h-4 w-4" />
+                    Novo Candidato
+                </button>
             </div>
 
             {/* Alerta de pendentes corporativo (sem blur chamativo) */}
@@ -173,6 +182,11 @@ export default function CandidatosPage() {
                     </div>
                 )
             }
+            <ModalNovoCandidato
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={refetch}
+            />
         </div>
     )
 }

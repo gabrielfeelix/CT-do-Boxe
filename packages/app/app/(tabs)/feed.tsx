@@ -1,6 +1,6 @@
 import { Feather, FontAwesome5 } from '@expo/vector-icons'
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View, Image } from 'react-native'
 
 import { useAuth } from '@/contexts/AuthContext'
 import { fetchFeedData, toggleFeedLike } from '@/lib/appData'
@@ -42,10 +42,10 @@ export default function FeedScreen() {
             prev.map((post) =>
                 post.id === postId
                     ? {
-                          ...post,
-                          likedByMe: nextLiked,
-                          curtidas: Math.max(0, optimisticTotal),
-                      }
+                        ...post,
+                        likedByMe: nextLiked,
+                        curtidas: Math.max(0, optimisticTotal),
+                    }
                     : post
             )
         )
@@ -55,10 +55,10 @@ export default function FeedScreen() {
             prev.map((post) =>
                 post.id === postId
                     ? {
-                          ...post,
-                          likedByMe: result.likedByMe,
-                          curtidas: result.curtidas,
-                      }
+                        ...post,
+                        likedByMe: result.likedByMe,
+                        curtidas: result.curtidas,
+                    }
                     : post
             )
         )
@@ -120,11 +120,12 @@ export default function FeedScreen() {
                                 </Text>
 
                                 {post.imagem ? (
-                                    <View className="mb-4 h-48 w-full items-center justify-center rounded-2xl border border-slate-200 bg-slate-100">
-                                        <Feather name="image" size={32} color="#CBD5E1" />
-                                        <Text className="mt-2 text-xs font-bold uppercase tracking-widest text-slate-400">
-                                            Midia anexada
-                                        </Text>
+                                    <View className="mb-4 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
+                                        <Image
+                                            source={{ uri: post.imagem }}
+                                            style={{ width: '100%', height: 300 }}
+                                            resizeMode="cover"
+                                        />
                                     </View>
                                 ) : null}
 
@@ -135,9 +136,8 @@ export default function FeedScreen() {
                                         className="flex-row items-center py-2"
                                     >
                                         <View
-                                            className={`relative mr-2 h-10 w-10 items-center justify-center rounded-full ${
-                                                post.likedByMe ? 'bg-red-50' : 'bg-slate-50'
-                                            }`}
+                                            className={`relative mr-2 h-10 w-10 items-center justify-center rounded-full ${post.likedByMe ? 'bg-red-50' : 'bg-slate-50'
+                                                }`}
                                         >
                                             <FontAwesome5
                                                 name="fire"
@@ -147,9 +147,8 @@ export default function FeedScreen() {
                                             />
                                         </View>
                                         <Text
-                                            className={`font-bold ${
-                                                post.likedByMe ? 'text-[#CC0000]' : 'text-slate-500'
-                                            }`}
+                                            className={`font-bold ${post.likedByMe ? 'text-[#CC0000]' : 'text-slate-500'
+                                                }`}
                                         >
                                             {post.curtidas} {post.curtidas === 1 ? 'curtida' : 'curtidas'}
                                         </Text>

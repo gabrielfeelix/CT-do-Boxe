@@ -80,24 +80,39 @@ export async function POST(req: NextRequest) {
 
         if (erroUpdate) throw erroUpdate
 
-        // 4. Cria avaliação física de entrada agendada para +3 dias
-        const dataAvaliacao = new Date()
-        dataAvaliacao.setDate(dataAvaliacao.getDate() + 3)
-        const dataAvaliacaoISO = dataAvaliacao.toISOString().slice(0, 10)
+        // 4. Migra avaliações do candidato para o aluno
+        // Se já existir avaliação preenchida na etapa de recrutamento, vinculamos ao novo aluno_id
+        const { error: errorMigracao } = await supabaseAdmin
+            .from('avaliacoes')
+            .update({ aluno_id: novoAluno.id })
+            .eq('candidato_id', candidato_id)
 
-        await supabaseAdmin.from('avaliacoes').insert({
-            aluno_id: novoAluno.id,
-            tipo: 'entrada',
-            status: 'agendada',
-            data_avaliacao: dataAvaliacaoISO,
-            resultado: 'pendente',
-        })
+        if (errorMigracao) throw errorMigracao
+
+        // 5. Caso não tenha avaliação vinda do recrutamento, cria uma agendada
+        const { data: avaliacoesAtuais } = await supabaseAdmin
+            .from('avaliacoes')
+            .select('id')
+            .eq('aluno_id', novoAluno.id)
+
+        if (!avaliacoesAtuais || avaliacoesAtuais.length === 0) {
+            const dataAvaliacao = new Date()
+            dataAvaliacao.setDate(dataAvaliacao.getDate() + 3)
+            const dataAvaliacaoISO = dataAvaliacao.toISOString().slice(0, 10)
+
+            await supabaseAdmin.from('avaliacoes').insert({
+                aluno_id: novoAluno.id,
+                tipo: 'entrada',
+                status: 'agendada',
+                data_avaliacao: dataAvaliacaoISO,
+                resultado: 'pendente',
+            })
+        }
 
         return NextResponse.json({
             sucesso: true,
             aluno_id: novoAluno.id,
-            data_avaliacao: dataAvaliacaoISO,
-            mensagem: `Conta criada para ${candidato.nome}. Aluno inativo até avaliação física em ${dataAvaliacaoISO}.`,
+            mensagem: `Conta criada para ${candidato.nome}. Avaliações migradas com sucesso.`,
         })
     } catch (err) {
         console.error('Erro ao aprovar candidato:', err)

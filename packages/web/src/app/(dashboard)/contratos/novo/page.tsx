@@ -93,7 +93,7 @@ function NovoContratoForm() {
             const payload = {
                 aluno_id: alunoSelecionado.id,
                 plano_id: planoSelecionado.id,
-                status: 'ativo',
+                status: 'pendente',
                 data_inicio: dataInicio,
                 data_fim: dataFim,
                 valor: planoSelecionado.valor,
@@ -263,11 +263,10 @@ function NovoContratoForm() {
                                     key={plano.id}
                                     type="button"
                                     onClick={() => setPlanoSelecionado(plano)}
-                                    className={`rounded-xl border p-4 text-left transition-colors ${
-                                        planoSelecionado?.id === plano.id
+                                    className={`rounded-xl border p-4 text-left transition-colors ${planoSelecionado?.id === plano.id
                                             ? 'border-[#CC0000] bg-red-50/40'
                                             : 'border-gray-200 bg-white hover:border-gray-300'
-                                    }`}
+                                        }`}
                                 >
                                     <p className="text-sm font-bold text-gray-900">{plano.nome}</p>
                                     <p className="mt-1 text-lg font-bold text-gray-900">

@@ -56,8 +56,19 @@ export default function SeriesAulasPage() {
             return
         }
 
-        toast.success('Serie criada com sucesso.')
+        toast.success('Serie criada com sucesso! Gerando aulas iniciais...')
+
+        // Gera automaticamente as aulas para os próximos 35 dias para esta nova série
+        if (result.data?.id) {
+            await gerarAulas({
+                dataInicio: hoje,
+                dataFim: adicionarDias(hoje, 35),
+                serieId: result.data.id
+            })
+        }
+
         setFormOpen(false)
+        refetch()
     }
 
     async function handleGerarAulas() {
@@ -143,31 +154,43 @@ export default function SeriesAulasPage() {
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</div>
             )}
 
-            <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-900">Gerar aulas por periodo</h3>
-                <p className="mt-1 text-sm font-medium text-gray-500">
-                    Popule automaticamente as aulas futuras a partir das series ativas.
+            <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-1">
+                    <div className="bg-gray-100 p-2 rounded-lg">
+                        <RefreshCcw className="w-5 h-5 text-gray-600" />
+                    </div>
+                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Manutenção da Agenda</h3>
+                </div>
+                <p className="text-sm font-medium text-gray-500 leading-relaxed max-w-2xl">
+                    As séries são como "moldes". Para que as aulas apareçam no calendário de todos os alunos, você precisa gerar as instâncias reais para um período. Use esta ferramenta para estender a agenda de todo o CT por mais algumas semanas.
                 </p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-                    <input
-                        type="date"
-                        value={dataInicioGeracao}
-                        onChange={(event) => setDataInicioGeracao(event.target.value)}
-                        className="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-300 focus:border-[#CC0000] focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20"
-                    />
-                    <input
-                        type="date"
-                        value={dataFimGeracao}
-                        onChange={(event) => setDataFimGeracao(event.target.value)}
-                        className="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-300 focus:border-[#CC0000] focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20"
-                    />
+                <div className="mt-6 flex flex-wrap items-end gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div className="flex-1 min-w-[140px]">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Gerar de:</label>
+                        <input
+                            type="date"
+                            value={dataInicioGeracao}
+                            onChange={(event) => setDataInicioGeracao(event.target.value)}
+                            className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-900 shadow-sm transition-all hover:border-gray-300 focus:border-[#CC0000] focus:ring-0"
+                        />
+                    </div>
+                    <div className="flex-1 min-w-[140px]">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Até:</label>
+                        <input
+                            type="date"
+                            value={dataFimGeracao}
+                            onChange={(event) => setDataFimGeracao(event.target.value)}
+                            className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-900 shadow-sm transition-all hover:border-gray-300 focus:border-[#CC0000] focus:ring-0"
+                        />
+                    </div>
                     <button
                         type="button"
                         onClick={handleGerarAulas}
                         disabled={gerando}
-                        className="inline-flex h-10 items-center justify-center rounded-lg bg-gray-900 px-4 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="h-11 px-8 rounded-xl bg-gray-900 hover:bg-black text-white text-sm font-black uppercase tracking-widest transition-all shadow-lg shadow-gray-200 disabled:opacity-50 active:scale-95 flex items-center gap-2"
                     >
-                        {gerando ? 'Gerando...' : 'Gerar aulas'}
+                        {gerando ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
+                        {gerando ? 'Sincronizando...' : 'Gerar Aulas de Todos'}
                     </button>
                 </div>
             </section>
@@ -181,10 +204,10 @@ export default function SeriesAulasPage() {
                     initialValues={
                         serieEdicao
                             ? {
-                                  ...serieEdicao,
-                                  hora_inicio: serieEdicao.hora_inicio.slice(0, 5),
-                                  hora_fim: serieEdicao.hora_fim.slice(0, 5),
-                              }
+                                ...serieEdicao,
+                                hora_inicio: serieEdicao.hora_inicio.slice(0, 5),
+                                hora_fim: serieEdicao.hora_fim.slice(0, 5),
+                            }
                             : undefined
                     }
                     onSubmit={handleSubmit}
@@ -217,11 +240,10 @@ export default function SeriesAulasPage() {
                                         <div className="flex flex-wrap items-center gap-2">
                                             <p className="text-sm font-bold text-gray-900">{serie.titulo}</p>
                                             <span
-                                                className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ${
-                                                    serie.ativo
+                                                className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ${serie.ativo
                                                         ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
                                                         : 'bg-gray-100 text-gray-600 ring-gray-200'
-                                                }`}
+                                                    }`}
                                             >
                                                 {serie.ativo ? 'Ativa' : 'Inativa'}
                                             </span>
