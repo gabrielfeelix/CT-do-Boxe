@@ -266,43 +266,48 @@ export default function AlunoDetalhePage() {
             </button>
 
             {/* Header Profile Premium */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden relative">
-                <div className="h-24 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 w-full" />
-                <div className="px-6 sm:px-8 pb-8">
-                    <div className="flex flex-col sm:flex-row sm:items-end gap-6 -mt-10 relative">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden relative">
+                {/* Banner / Cover Plate */}
+                <div className="h-32 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-900 w-full relative">
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-90" />
+                    <div className="absolute -bottom-10 right-0 w-64 h-64 bg-[#CC0000] blur-[100px] rounded-full opacity-20 pointer-events-none" />
+                </div>
+
+                <div className="px-6 sm:px-10 pb-8">
+                    <div className="flex flex-col md:flex-row md:items-end gap-6 sm:gap-8 -mt-12 relative z-10">
 
                         {/* Avatar Em destaque */}
-                        <div className="ring-4 ring-white rounded-full bg-white self-start sm:self-auto">
+                        <div className="ring-4 ring-white rounded-2xl bg-white self-start md:self-auto shadow-sm overflow-hidden shrink-0 transition-transform hover:scale-105 duration-300">
                             <AvatarInitials nome={aluno.nome} fotoUrl={aluno.foto_url} size="xl" />
                         </div>
 
                         {/* Info principal container */}
-                        <div className="flex-1 min-w-0 flex flex-col sm:flex-row justify-between sm:items-end gap-4 pb-1">
+                        <div className="flex-1 min-w-0 flex flex-col md:flex-row justify-between md:items-end gap-6 pb-2">
                             <div>
-                                <div className="flex items-center gap-3 flex-wrap">
-                                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{aluno.nome}</h2>
+                                <div className="flex items-center gap-3 flex-wrap mb-1.5">
+                                    <h2 className="text-3xl font-black text-gray-900 tracking-tight">{aluno.nome}</h2>
                                     <StatusBadge status={aluno.status} />
                                 </div>
-                                <p className="mt-1.5 text-sm font-medium text-gray-500 flex items-center gap-2">
-                                    Membro desde {formatDate(aluno.data_cadastro || aluno.created_at)}
+                                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                    Membro Desde <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md">{formatDate(aluno.data_cadastro || aluno.created_at)}</span>
                                 </p>
                             </div>
 
-                            {/* Ações Rápidas */}
-                            <div className="flex flex-wrap items-center gap-2.5">
+                            {/* Ações Rápidas Premium */}
+                            <div className="flex flex-wrap items-center gap-3">
                                 {aluno.telefone && (
                                     <button
                                         onClick={handleWhatsApp}
-                                        className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-[#25D366] hover:bg-[#128C7E] rounded-xl shadow-sm hover:shadow transition-all duration-200"
+                                        className="flex items-center gap-2 px-4 py-2.5 text-xs font-black text-white bg-[#25D366] hover:bg-[#128C7E] uppercase tracking-widest rounded-xl shadow-sm hover:shadow transition-all duration-200"
                                     >
                                         <MessageCircle className="h-4 w-4" />
-                                        Enviar WhatsApp
+                                        WhatsApp
                                     </button>
                                 )}
                                 <button
                                     onClick={handleBloquear}
                                     disabled={salvando || aluno.status === 'cancelado'}
-                                    className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl shadow-sm transition-all duration-200 disabled:opacity-40"
+                                    className="flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-widest text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl shadow-sm transition-all duration-200 disabled:opacity-40"
                                 >
                                     {aluno.status === 'bloqueado' ? (
                                         <><ShieldCheck className="h-4 w-4 text-green-600" /> Liberar Acesso</>
@@ -310,6 +315,17 @@ export default function AlunoDetalhePage() {
                                         <><Lock className="h-4 w-4 text-yellow-600" /> Travar Acesso</>
                                     )}
                                 </button>
+                                {aluno.status !== 'cancelado' && (
+                                    <button
+                                        onClick={handleCancelar}
+                                        disabled={salvando}
+                                        className="flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-widest text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 hover:border-red-300 rounded-xl shadow-sm transition-all duration-200 disabled:opacity-40"
+                                        title="Encerrar Vínculo Total"
+                                    >
+                                        <UserX className="h-4 w-4" />
+                                        Encerrar
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -389,23 +405,19 @@ export default function AlunoDetalhePage() {
 
                     {/* Col 3: Side actions */}
                     <div className="space-y-6">
-                        {aluno.status !== 'cancelado' && (
-                            <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-6 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -mr-16 -mt-16 blur-2xl" />
-                                <h3 className="text-sm font-bold text-gray-900 relative z-10">Zona de Perigo</h3>
-                                <p className="text-xs font-medium text-gray-500 mt-1.5 mb-5 relative z-10 pr-4">
-                                    Cancelar o contrato deste aluno é uma via sem volta, e cortará todos os acessos app.
-                                </p>
-                                <button
-                                    onClick={handleCancelar}
-                                    disabled={salvando}
-                                    className="w-full relative z-10 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition-all duration-200 disabled:opacity-40 shadow-sm hover:shadow"
-                                >
-                                    <UserX className="h-4 w-4" />
-                                    Encerrar Cadastro
-                                </button>
-                            </div>
-                        )}
+                        <div className="bg-white rounded-2xl border border-blue-100 shadow-sm p-6 relative overflow-hidden h-full flex flex-col justify-center">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
+                            <h3 className="text-sm font-bold text-gray-900 relative z-10 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-blue-500" /> Área de Suporte</h3>
+                            <p className="text-xs font-medium text-gray-500 mt-2 mb-5 relative z-10">
+                                Precisando de ajuda com este aluno? Utilize a Central de Dúvidas para relatar qualquer instabilidade técnica ou acionar a administração.
+                            </p>
+                            <button
+                                className="w-full relative z-10 flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-all duration-200 shadow-sm hover:shadow"
+                            >
+                                <MessageCircle className="h-4 w-4" />
+                                Suporte Técnico
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

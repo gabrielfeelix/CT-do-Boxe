@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Pause, Play, Settings, Square, Volume2, VolumeX, History, Watch } from 'lucide-react'
+import { ArrowLeft, Pause, Play, Settings, Square, Volume2, VolumeX, History, Watch, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 type FaseTimer = 'preparacao' | 'trabalho' | 'descanso'
@@ -41,32 +41,7 @@ const DEFAULT_CONFIG: TimerConfig = {
     avisoProximoRoundSegundos: 10,
 }
 
-const PRESETS: TimerPreset[] = [
-    {
-        id: 'boxe-pro',
-        nome: 'Boxe Profissional',
-        descricao: '12 Rounds x 3 Min / 1 Min',
-        config: { rounds: 12, trabalhoSegundos: 180, descansoSegundos: 60, preparacaoSegundos: 10, avisoFimSegundos: 10, avisoProximoRoundSegundos: 10 },
-    },
-    {
-        id: 'boxe-amador',
-        nome: 'Boxe Amador',
-        descricao: '3 Rounds x 3 Min / 1 Min',
-        config: { rounds: 3, trabalhoSegundos: 180, descansoSegundos: 60, preparacaoSegundos: 10, avisoFimSegundos: 10, avisoProximoRoundSegundos: 10 },
-    },
-    {
-        id: 'sparring-curto',
-        nome: 'Sparring Rápido',
-        descricao: '5 Rounds x 2 Min / 1 Min',
-        config: { rounds: 5, trabalhoSegundos: 120, descansoSegundos: 60, preparacaoSegundos: 10, avisoFimSegundos: 10, avisoProximoRoundSegundos: 10 },
-    },
-    {
-        id: 'aquecimento',
-        nome: 'Aquecimento (Tabata)',
-        descricao: '8 Rounds x 0:20 / 0:10',
-        config: { rounds: 8, trabalhoSegundos: 20, descansoSegundos: 10, preparacaoSegundos: 5, avisoFimSegundos: 3, avisoProximoRoundSegundos: 3 },
-    },
-]
+
 
 const DURACOES_PREPARACAO = [5, 10, 15]
 const DURACOES_TRABALHO = [20, 60, 120, 180, 240, 300]
@@ -109,8 +84,14 @@ function formatarMinSeg(segundos: number) {
     return `${minutos}:${segs.toString().padStart(2, '0')}`
 }
 
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
+
 export default function TimerPage() {
     const router = useRouter()
+    const supabase = createClient()
+    const [presetsDb, setPresetsDb] = useState<TimerPreset[]>([])
+    const [nomePreset, setNomePreset] = useState('')
 
     const [config, setConfig] = useState<TimerConfig>(DEFAULT_CONFIG)
     const [configEdicao, setConfigEdicao] = useState<TimerConfig>(DEFAULT_CONFIG)
@@ -154,7 +135,29 @@ export default function TimerPage() {
             audio.preload = 'auto'
             audioBasesRef.current[key] = audio
         })
+
+        fetchPresets()
     }, [])
+
+    async function fetchPresets() {
+        const { data } = await supabase.from('timers_presets').select('*').eq('ativo', true).order('created_at', { ascending: true })
+        if (data) {
+            const map = data.map((d: any) => ({
+                id: d.id,
+                nome: d.nome,
+                descricao: d.descricao || `${d.rounds} Rounds x ${formatarMinSeg(d.trabalho_segundos)} / ${formatarMinSeg(d.descanso_segundos)}`,
+                config: {
+                    rounds: d.rounds,
+                    trabalhoSegundos: d.trabalho_segundos,
+                    descansoSegundos: d.descanso_segundos,
+                    preparacaoSegundos: d.preparacao_segundos,
+                    avisoFimSegundos: d.aviso_fim_segundos,
+                    avisoProximoRoundSegundos: d.aviso_proximo_round_segundos
+                }
+            }))
+            setPresetsDb(map)
+        }
+    }
 
     const tocarSom = useCallback((key: SoundKey, options: SoundPlaybackOptions = {}) => {
         if (!somStatusRef.current) return
@@ -323,10 +326,43 @@ export default function TimerPage() {
         setConfigAberto(false)
     }, [])
 
-    const salvarEdicaoConfig = useCallback(() => {
+    const salvarEdicaoConfig = useCallback(async () => {
+        if (nomePreset.trim()) {
+            if (presetsDb.length >= 7) {
+                toast.error('Limite máximo de 7 presets no sistema. Exclua algum caso queira adicionar outro.')
+                return
+            }
+
+            const { error } = await supabase.from('timers_presets').insert({
+                nome: nomePreset.trim(),
+                rounds: configEdicao.rounds,
+                trabalho_segundos: configEdicao.trabalhoSegundos,
+                descanso_segundos: configEdicao.descansoSegundos,
+                preparacao_segundos: configEdicao.preparacaoSegundos,
+                aviso_fim_segundos: configEdicao.avisoFimSegundos,
+                aviso_proximo_round_segundos: configEdicao.avisoProximoRoundSegundos
+            })
+
+            if (error) { toast.error('Erro ao conectar banco.'); return }
+            toast.success('Novo Preset gravado na base!')
+            fetchPresets()
+        }
+
         aplicarConfig(configEdicao)
         setConfigAberto(false)
-    }, [aplicarConfig, configEdicao])
+        setNomePreset('')
+    }, [aplicarConfig, configEdicao, nomePreset, presetsDb.length, supabase])
+
+    const handleExcluirPreset = useCallback(async (e: React.MouseEvent, id: string, name: string) => {
+        e.stopPropagation()
+        if (!confirm(`Excluir permanentemente o timer ${name}?`)) return
+
+        const { error } = await supabase.from('timers_presets').delete().eq('id', id)
+        if (error) { toast.error('Falha ao excluir timer.'); return }
+
+        toast.success('Timer excluído com sucesso.')
+        fetchPresets()
+    }, [supabase])
 
     const progresso = useMemo(() => {
         const total = Math.max(1, duracaoFaseAtual)
@@ -388,17 +424,26 @@ export default function TimerPage() {
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5 mb-2">
                         <History className="w-4 h-4" /> Treinos Frequentes
                     </p>
-                    {PRESETS.map(preset => (
+                    {presetsDb.map(preset => (
                         <button
                             key={preset.id}
                             onClick={() => aplicarPreset(preset)}
-                            className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-left hover:border-red-200 hover:bg-red-50/20 transition-all group shadow-sm flex items-center justify-between"
+                            className="w-full relative bg-white border border-gray-200 rounded-2xl p-4 text-left hover:border-red-200 hover:bg-red-50/20 transition-all group shadow-sm flex items-center justify-between overflow-hidden"
                         >
-                            <div className="space-y-1">
-                                <h4 className="text-sm font-bold text-gray-900 group-hover:text-red-700 transition-colors">{preset.nome}</h4>
+                            <div className="space-y-1 z-10">
+                                <h4 className="text-sm font-bold text-gray-900 group-hover:text-red-700 transition-colors pr-8">{preset.nome}</h4>
                                 <p className="text-xs font-semibold text-gray-500">{preset.descricao}</p>
                             </div>
-                            <Play className="w-4 h-4 text-gray-300 group-hover:text-red-500 transition-colors" />
+                            <div className="flex items-center gap-2">
+                                <Play className="w-4 h-4 text-gray-300 group-hover:text-red-500 transition-colors" />
+                                <div
+                                    onClick={(e) => handleExcluirPreset(e, preset.id, preset.nome)}
+                                    className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all absolute top-2 right-2 flex items-center justify-center pointer-events-auto"
+                                    title="Excluir Preset"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </div>
+                            </div>
                         </button>
                     ))}
                 </div>
@@ -478,6 +523,15 @@ export default function TimerPage() {
 
                         <div className="space-y-4">
                             <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Nome do Preset (Opcional Salvar)</label>
+                                <input
+                                    value={nomePreset}
+                                    onChange={e => setNomePreset(e.target.value)}
+                                    placeholder="Ex: Treino Personalizado Sexta"
+                                    className="w-full bg-gray-50 border border-gray-200 focus:bg-white rounded-xl px-4 py-2.5 font-bold outline-none ring-red-500 focus:ring-2 focus:border-red-500 text-sm"
+                                />
+                            </div>
+                            <div className="border-t border-gray-100 pt-4">
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Rounds Totais</label>
                                 <div className="flex bg-gray-100 rounded-xl overflow-hidden p-1">
                                     <button onClick={() => setConfigEdicao(prev => ({ ...prev, rounds: clamp(prev.rounds - 1, 1, 20) }))} className="w-10 bg-white shadow-sm font-bold text-gray-900 rounded-lg">-</button>
@@ -511,7 +565,7 @@ export default function TimerPage() {
 
                         <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
                             <button onClick={cancelarEdicaoConfig} className="py-2.5 px-4 font-bold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">Cancelar</button>
-                            <button onClick={salvarEdicaoConfig} className="py-2.5 px-4 font-bold text-white bg-gray-900 hover:bg-black rounded-xl shadow-sm transition-colors">Salvar Preset</button>
+                            <button onClick={salvarEdicaoConfig} className="py-2.5 px-4 font-bold text-white bg-gray-900 hover:bg-black rounded-xl shadow-sm transition-colors">{nomePreset ? 'Gravar Nova Matriz DB' : 'Apenas Aplicar Tempo'}</button>
                         </div>
                     </div>
                 </div>
