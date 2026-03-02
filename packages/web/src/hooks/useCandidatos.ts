@@ -7,9 +7,10 @@ import type { Candidato } from '@/types'
 
 interface UseCandidatosOptions {
     status?: string
+    busca?: string
 }
 
-export function useCandidatos({ status = '' }: UseCandidatosOptions = {}) {
+export function useCandidatos({ status = '', busca = '' }: UseCandidatosOptions = {}) {
     const [candidatos, setCandidatos] = useState<Candidato[]>([])
     const [loading, setLoading] = useState(true)
     const [total, setTotal] = useState(0)
@@ -28,6 +29,10 @@ export function useCandidatos({ status = '' }: UseCandidatosOptions = {}) {
             query = query.eq('status', status)
         }
 
+        if (busca && busca.trim().length > 0) {
+            query = query.ilike('nome', `%${busca}%`)
+        }
+
         const { data, count } = await query
         setCandidatos((data as Candidato[]) ?? [])
         setTotal(count ?? 0)
@@ -40,9 +45,15 @@ export function useCandidatos({ status = '' }: UseCandidatosOptions = {}) {
 
         setPendentes(countPendentes ?? 0)
         setLoading(false)
-    }, [status])
+    }, [status, busca])
 
-    useEffect(() => { fetch() }, [fetch])
+    useEffect(() => {
+        const delaySearch = setTimeout(() => {
+            fetch()
+        }, busca ? 300 : 0)
+
+        return () => clearTimeout(delaySearch)
+    }, [fetch])
 
     return { candidatos, loading, total, pendentes, refetch: fetch }
 }

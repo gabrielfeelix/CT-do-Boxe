@@ -1,12 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Bell, CalendarClock, CreditCard, ShieldAlert, Megaphone, Trash2, CheckCheck, Check, ExternalLink, Settings2, Instagram, Youtube, Video, RefreshCw, Smartphone } from 'lucide-react'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { useNotificacoes, type NotificacaoItem } from '@/hooks/useNotificacoes'
+import { useProfessoresSelect } from '@/hooks/useProfessores'
+import { createClient } from '@/lib/supabase/client'
 
 type Filtro = 'todas' | 'nao_lidas'
 type Tab = 'inbox' | 'regras'
@@ -120,7 +122,21 @@ function ToggleRule({ label, description, icon: Icon, defaultChecked = false, ta
 
 
 export default function NotificacoesPage() {
-    const { notificacoes, loading, error, naoLidas, marcarComoLida, marcarTodasComoLidas, removerNotificacao } = useNotificacoes()
+    const { professores } = useProfessoresSelect()
+    const supabase = createClient()
+    const [userEmail, setUserEmail] = useState<string | null>(null)
+
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => {
+            setUserEmail(data.user?.email ?? null)
+        })
+    }, [supabase])
+
+    const profAtual = professores.find(p => p.email?.toLowerCase() === userEmail?.toLowerCase())
+        ?? professores.find(p => p.nome?.toLowerCase().includes('argel'))
+        ?? (professores.length > 0 ? professores[0] : null)
+
+    const { notificacoes, loading, error, naoLidas, marcarComoLida, marcarTodasComoLidas, removerNotificacao } = useNotificacoes(profAtual || undefined)
     const [busca, setBusca] = useState('')
     const [filtro, setFiltro] = useState<Filtro>('todas')
     const [tab, setTab] = useState<Tab>('inbox')

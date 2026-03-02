@@ -279,6 +279,24 @@ export async function setPresencaStatus(
         status,
         data_checkin: status === 'presente' ? new Date().toISOString() : null,
     })
+
+    // Se for um check-in (presente), notifica o admin/professor
+    if (status === 'presente') {
+        const { data: aluno } = await supabase.from('alunos').select('nome').eq('id', alunoId).single()
+        const { data: aula } = await supabase.from('aulas').select('nome, professor').eq('id', aulaId).single()
+
+        if (aluno && aula) {
+            await supabase.from('notificacoes').insert({
+                titulo: 'Novo Check-in realizado',
+                subtitulo: `${aluno.nome} entrou na aula`,
+                mensagem: `${aluno.nome} confirmou presença na aula "${aula.nome}" com ${aula.professor}`,
+                tipo: 'aula',
+                lida: false,
+                acao: 'checkin',
+                link: `/aulas/${aulaId}`
+            })
+        }
+    }
 }
 
 export async function fetchCheckinData(alunoId: string): Promise<CheckinData> {
@@ -376,6 +394,22 @@ export async function toggleFeedLike(postId: string, alunoId: string, currentlyL
             .eq('aluno_id', alunoId)
     } else {
         await supabase.from('post_curtidas').insert({ post_id: postId, aluno_id: alunoId })
+
+        // Notifica o autor do post e o adm
+        const { data: post } = await supabase.from('posts').select('conteudo').eq('id', postId).single()
+        const { data: aluno } = await supabase.from('alunos').select('nome').eq('id', alunoId).single()
+
+        if (post && aluno) {
+            await supabase.from('notificacoes').insert({
+                titulo: 'Nova curtida no Feed',
+                subtitulo: `${aluno.nome} curtiu seu post`,
+                mensagem: `${aluno.nome} curtiu: "${post.conteudo?.substring(0, 40)}..."`,
+                tipo: 'ct',
+                lida: false,
+                acao: 'like',
+                link: '/feed'
+            })
+        }
     }
 
     const countRes = await supabase
@@ -776,10 +810,10 @@ export async function fetchPagamentoAtual(alunoId: string): Promise<PagamentoAtu
 
     const contractRes = payment.contrato_id
         ? await supabase
-              .from('contratos_com_status')
-              .select('plano_nome')
-              .eq('id', payment.contrato_id as string)
-              .maybeSingle()
+            .from('contratos_com_status')
+            .select('plano_nome')
+            .eq('id', payment.contrato_id as string)
+            .maybeSingle()
         : null
 
     return {
@@ -813,9 +847,9 @@ export async function fetchAulaDetalhe(alunoId: string, aulaId: string): Promise
             : { data: [] as Array<{ id: string; nome: string }> }
 
     const nomeById: Record<string, string> = {}
-    ;((alunosRes.data as Array<{ id: string; nome: string }>) ?? []).forEach((aluno) => {
-        nomeById[aluno.id] = aluno.nome
-    })
+        ; ((alunosRes.data as Array<{ id: string; nome: string }>) ?? []).forEach((aluno) => {
+            nomeById[aluno.id] = aluno.nome
+        })
 
     const confirmados = presencas
         .map((presenca) => nomeById[presenca.aluno_id])

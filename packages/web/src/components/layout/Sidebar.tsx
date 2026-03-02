@@ -55,21 +55,21 @@ export function Sidebar() {
     const supabase = createClient()
     const { pendentes: pendentesCandidatos } = useCandidatos()
     const { avaliacoes: pendentesAvaliacoes } = useAvaliacoesPendentes()
-    const { naoLidas: totalNotificacoes } = useNotificacoes()
     const { professores } = useProfessoresSelect()
     const [userEmail, setUserEmail] = useState<string | null>(null)
+
+    // Match logged user with professor profile via email
+    const profAtual = professores.find(p => p.email?.toLowerCase() === userEmail?.toLowerCase())
+        ?? professores.find(p => p.nome?.toLowerCase().includes('argel'))
+        ?? (professores.length > 0 ? professores[0] : null)
+
+    const { naoLidas: totalNotificacoes } = useNotificacoes(profAtual || undefined)
 
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => {
             setUserEmail(data.user?.email ?? null)
         })
     }, [supabase])
-
-    // Match logged user with professor profile via email
-    const profAtual = professores.find(p => p.email?.toLowerCase() === userEmail?.toLowerCase())
-        ?? professores.find(p => p.nome?.toLowerCase().includes('argel'))
-        ?? professores[0]
-        ?? null
 
     const isAdmin = profAtual?.role === 'super_admin'
 

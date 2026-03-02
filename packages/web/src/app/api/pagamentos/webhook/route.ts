@@ -95,7 +95,18 @@ export async function POST(req: NextRequest) {
                 .from('alunos')
                 .update({ status: 'ativo' })
                 .eq('id', pagamento.aluno_id)
-            // Se estava inativo, aguardando ou bloqueado, agora está pagante e ativo.
+
+            // Notifica o admin
+            const { data: aluno } = await supabase.from('alunos').select('nome').eq('id', pagamento.aluno_id).single()
+            await supabase.from('notificacoes').insert({
+                titulo: 'Pagamento Confirmado',
+                subtitulo: `${aluno?.nome || 'Aluno'} pagou a fatura`,
+                mensagem: `O Mercado Pago confirmou o recebimento da fatura do aluno ${aluno?.nome || 'UID: ' + pagamento.aluno_id}.`,
+                tipo: 'pagamento',
+                lida: false,
+                acao: 'pagamento',
+                link: '/financeiro'
+            })
         }
 
         return NextResponse.json({ received: true })

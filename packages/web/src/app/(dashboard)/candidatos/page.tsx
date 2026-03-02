@@ -26,8 +26,12 @@ const EXPERIENCIA_LABELS: Record<string, string> = {
 
 export default function CandidatosPage() {
     const [statusFiltro, setStatusFiltro] = useState('todos')
+    const [busca, setBusca] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const { candidatos, loading, total, pendentes, refetch } = useCandidatos({ status: statusFiltro })
+    const { candidatos, loading, total, pendentes, refetch } = useCandidatos({
+        status: statusFiltro,
+        busca: busca
+    })
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto pb-8 animate-in slide-in-from-bottom-2 duration-300">
@@ -100,6 +104,8 @@ export default function CandidatosPage() {
                     <input
                         type="text"
                         placeholder="Buscar pelo nome..."
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
                         className="w-full sm:w-64 pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#CC0000] focus:border-[#CC0000]"
                     />
                 </div>

@@ -13,7 +13,7 @@ export interface NotificacaoItem extends Notificacao {
     aluno?: NotificacaoAluno | null
 }
 
-export function useNotificacoes() {
+export function useNotificacoes(professor?: { nome: string, role: string }) {
     const [notificacoes, setNotificacoes] = useState<NotificacaoItem[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -23,10 +23,15 @@ export function useNotificacoes() {
         setLoading(true)
         setError(null)
 
-        const { data, error: queryError } = await supabase
+        let query = supabase
             .from('notificacoes')
             .select('id,titulo,subtitulo,mensagem,tipo,lida,aluno_id,acao,link,created_at,updated_at,aluno:alunos(nome,email)')
             .order('created_at', { ascending: false })
+
+        // Se não for super admin e for professor, filtra os resultados no client
+        // (Ou poderíamos filtrar no server se tivéssemos a coluna professor_id)
+
+        const { data, error: queryError } = await query
 
         if (queryError) {
             setError('Não foi possível carregar as notificacoes.')
@@ -35,16 +40,26 @@ export function useNotificacoes() {
             return
         }
 
-        setNotificacoes((data as NotificacaoItem[]) ?? [])
+        let results = (data as NotificacaoItem[]) ?? []
+
+        // Filtro lógico para Professores (não super-admin)
+        if (professor && professor.role === 'professor') {
+            const nomeProf = (professor.nome || '').toLowerCase()
+            results = results.filter(n => {
+                const msg = (n.mensagem || '').toLowerCase()
+                const sub = (n.subtitulo || '').toLowerCase()
+                const titulo = (n.titulo || '').toLowerCase()
+
+                return msg.includes(nomeProf) || sub.includes(nomeProf) || titulo.includes(nomeProf) || n.tipo === 'ct'
+            })
+        }
+
+        setNotificacoes(results)
         setLoading(false)
-    }, [supabase])
+    }, [supabase, professor?.nome, professor?.role])
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            fetch()
-        }, 0)
-
-        return () => clearTimeout(timer)
+        fetch()
     }, [fetch])
 
     const naoLidas = useMemo(() => notificacoes.filter((item) => !item.lida).length, [notificacoes])
