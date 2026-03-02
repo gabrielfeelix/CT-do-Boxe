@@ -42,25 +42,49 @@ function NotificacaoCard({ item, processando, onToggleLida, onRemover }: {
     const meta = obterMeta(item.tipo)
     const Icon = meta.icon
     return (
-        <article className={`rounded-2xl border p-5 shadow-sm transition-all duration-200 ${item.lida ? 'border-gray-100 bg-white' : 'border-red-200 bg-gradient-to-r from-red-50/80 to-orange-50/50'}`}>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <article className={`rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-300 group ${item.lida ? 'border-gray-100 bg-white hover:border-gray-200' : 'border-[#CC0000]/20 bg-gradient-to-r from-red-50/80 to-orange-50/50 backdrop-blur-sm relative overflow-hidden'}`}>
+            {!item.lida && <div className="absolute top-0 left-0 w-1 h-full bg-[#CC0000] shadow-[0_0_10px_rgba(204,0,0,0.5)]" />}
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between relative z-10">
                 <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex flex-wrap items-center gap-2">
-                        <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${meta.tone}`}>
+                    <div className="mb-3 flex flex-wrap items-center gap-2.5">
+                        <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] sm:text-[11px] font-black uppercase tracking-widest ${meta.tone}`}>
                             <Icon className="h-3.5 w-3.5" /> {meta.label}
                         </span>
-                        {!item.lida && <span className="rounded-full bg-[#CC0000] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">Nova</span>}
-                        <span className="text-xs font-semibold text-gray-400">{formatarMomento(item.created_at)}</span>
+                        {!item.lida && <span className="rounded-full bg-[#CC0000] px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white shadow-sm animate-pulse">Nova</span>}
+                        <span className="text-xs font-bold text-gray-400 flex items-center gap-1 flex-1 sm:flex-none justify-end sm:justify-start">
+                            <CalendarClock className="w-3 h-3" /> {formatarMomento(item.created_at)}
+                        </span>
                     </div>
-                    <h3 className="text-base font-bold text-gray-900">{item.titulo}</h3>
-                    {item.subtitulo && <p className="mt-0.5 text-sm font-semibold text-gray-600">{item.subtitulo}</p>}
-                    {item.mensagem && <p className="mt-2 text-sm font-medium leading-relaxed text-gray-600">{item.mensagem}</p>}
-                    {item.aluno?.nome && <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-gray-400">Aluno: {item.aluno.nome}</p>}
+
+                    <h3 className={`text-base sm:text-lg font-black tracking-tight ${item.lida ? 'text-gray-900 group-hover:text-[#CC0000] transition-colors' : 'text-gray-900'}`}>{item.titulo}</h3>
+
+                    {item.subtitulo && <p className="mt-1 text-sm font-bold text-gray-500 uppercase tracking-widest">{item.subtitulo}</p>}
+                    {item.mensagem && <p className="mt-3 text-sm font-medium leading-relaxed text-gray-600 bg-gray-50/50 p-3 rounded-xl border border-gray-100">{item.mensagem}</p>}
+                    {item.aluno?.nome && <p className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-1 rounded-md"><Smartphone className="w-3 h-3" /> Aluno: {item.aluno.nome}</p>}
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
-                    {item.link && <Link href={item.link} className="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-50">Abrir <ExternalLink className="h-3.5 w-3.5" /></Link>}
-                    <button onClick={() => onToggleLida(item)} disabled={processando} className="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 text-xs font-bold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"><Check className="h-3.5 w-3.5" /> {item.lida ? 'Marcar nova' : 'Marcar lida'}</button>
-                    <button onClick={() => onRemover(item.id)} disabled={processando} className="inline-flex h-9 items-center gap-1 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /> Remover</button>
+
+                <div className="flex shrink-0 items-center justify-end sm:justify-start gap-2 pt-2 sm:pt-0 mt-4 sm:mt-0 border-t sm:border-t-0 border-gray-100">
+                    {item.link && (
+                        <Link href={item.link} className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 text-xs font-black uppercase tracking-widest text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:border-gray-300">
+                            Abrir <ExternalLink className="h-3.5 w-3.5" />
+                        </Link>
+                    )}
+                    <button
+                        onClick={() => onToggleLida(item)}
+                        disabled={processando}
+                        className={`inline-flex h-10 items-center gap-1.5 rounded-xl border px-4 text-xs font-black uppercase tracking-widest shadow-sm transition-all disabled:opacity-50 ${item.lida ? 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50' : 'border-gray-900 bg-gray-900 text-white hover:bg-black'}`}
+                    >
+                        <Check className="h-4 w-4" /> {item.lida ? 'Marcar nova' : 'Dar Baixa'}
+                    </button>
+                    <button
+                        onClick={() => onRemover(item.id)}
+                        disabled={processando}
+                        className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-3 text-xs font-black uppercase tracking-widest text-red-600 shadow-sm transition-all hover:bg-red-100 hover:border-red-200 disabled:opacity-50 group/trash"
+                        title="Remover permanentemente"
+                    >
+                        <Trash2 className="h-4 w-4 group-hover/trash:scale-110 transition-transform" />
+                    </button>
                 </div>
             </div>
         </article>

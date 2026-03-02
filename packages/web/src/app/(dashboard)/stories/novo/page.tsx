@@ -22,16 +22,38 @@ export default function NovoVideoTrilhaPage() {
 
     // Upload Supabase Storage
     const [uploadando, setUploadando] = useState(false)
+    const [criandoCat, setCriandoCat] = useState(false)
 
 
+
+    const fetchCats = async () => {
+        const { data } = await supabase.from('trilhas_categorias').select('id, nome').eq('ativo', true).order('ordem', { ascending: true })
+        if (data) setDbCategorias(data)
+    }
 
     useEffect(() => {
-        async function fetchCats() {
-            const { data } = await supabase.from('trilhas_categorias').select('id, nome').eq('ativo', true).order('ordem', { ascending: true })
-            if (data) setDbCategorias(data)
-        }
         fetchCats()
     }, [])
+
+    async function handleCriarCategoria() {
+        if (!novaCategoria.trim()) return
+        setCriandoCat(true)
+
+        const { data, error } = await supabase.from('trilhas_categorias').insert({
+            nome: novaCategoria.trim(),
+            ativo: true
+        }).select('id').single()
+
+        if (error || !data) {
+            toast.error('Erro ao criar módulo.')
+        } else {
+            toast.success('Módulo criado com sucesso!')
+            await fetchCats()
+            setCategoria(data.id)
+            setNovaCategoria('')
+        }
+        setCriandoCat(false)
+    }
 
     async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
@@ -68,28 +90,13 @@ export default function NovoVideoTrilhaPage() {
     }
 
     async function handleSalvar() {
-        if (!videoUrl || !titulo.trim() || (!categoria && !novaCategoria.trim())) {
-            toast.error('Preencha os dados obrigatórios: Título, Categoria e Vídeo.')
+        if (!videoUrl || !titulo.trim() || !categoria || categoria === 'nova') {
+            toast.error('Preencha os dados obrigatórios: Título, Selecione um Módulo e o Vídeo.')
             return
         }
 
         setSalvando(true)
-        let finalCatId = categoria
-
-        // Se escolheu 'nova', cria a categoria primeiro
-        if (categoria === 'nova') {
-            const { data: newCat, error: errCat } = await supabase.from('trilhas_categorias').insert({
-                nome: novaCategoria.trim(),
-                ativo: true
-            }).select('id').single()
-
-            if (errCat || !newCat) {
-                toast.error('Erro ao registrar nova categoria de módulo.')
-                setSalvando(false)
-                return
-            }
-            finalCatId = newCat.id
-        }
+        const finalCatId = categoria
 
         const { error } = await supabase.from('trilhas_videos').insert({
             titulo: titulo.trim(),
@@ -171,12 +178,22 @@ export default function NovoVideoTrilhaPage() {
                         </select>
 
                         {categoria === 'nova' && (
-                            <input
-                                value={novaCategoria}
-                                onChange={e => setNovaCategoria(e.target.value)}
-                                placeholder="Nome do novo Módulo"
-                                className="w-full p-4 text-sm font-bold text-gray-900 border border-[#CC0000] bg-red-50/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CC0000] focus:border-[#CC0000] transition-all shadow-sm"
-                            />
+                            <div className="flex animate-in fade-in zoom-in-95 duration-200">
+                                <input
+                                    value={novaCategoria}
+                                    onChange={e => setNovaCategoria(e.target.value)}
+                                    placeholder="Nome do novo Módulo"
+                                    className="flex-1 p-4 text-sm font-bold text-gray-900 border border-[#CC0000] bg-red-50/30 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-[#CC0000] focus:border-[#CC0000] transition-all shadow-sm"
+                                    onKeyDown={e => e.key === 'Enter' && handleCriarCategoria()}
+                                />
+                                <button
+                                    onClick={handleCriarCategoria}
+                                    disabled={criandoCat || !novaCategoria.trim()}
+                                    className="bg-[#CC0000] hover:bg-[#AA0000] text-white px-6 font-black uppercase tracking-widest text-xs rounded-r-xl transition-colors disabled:opacity-50"
+                                >
+                                    {criandoCat ? '...' : 'Confirmar'}
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
