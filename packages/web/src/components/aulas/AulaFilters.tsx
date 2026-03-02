@@ -47,8 +47,10 @@ export function AulaFilters({
 }: AulaFiltersProps) {
     return (
         <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-                <div className="md:col-span-2">
+            <div className="flex flex-wrap items-end gap-3">
+
+                {/* Busca — maior */}
+                <div className="min-w-[220px] flex-[2]">
                     <SearchInput
                         value={busca}
                         onChange={onBuscaChange}
@@ -56,7 +58,7 @@ export function AulaFilters({
                     />
                 </div>
 
-                <div>
+                <div className="min-w-[130px] flex-1">
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                         Status
                     </label>
@@ -73,7 +75,7 @@ export function AulaFilters({
                     </select>
                 </div>
 
-                <div>
+                <div className="min-w-[150px] flex-1">
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                         Categoria
                     </label>
@@ -90,7 +92,7 @@ export function AulaFilters({
                     </select>
                 </div>
 
-                <div>
+                <div className="min-w-[150px] flex-1">
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                         Professor(a)
                     </label>
@@ -101,30 +103,30 @@ export function AulaFilters({
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                    <div>
-                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            De
-                        </label>
-                        <input
-                            type="date"
-                            className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-300 focus:border-[#CC0000] focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20"
-                            value={dataInicio}
-                            onChange={(event) => onDataInicioChange(event.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            Ate
-                        </label>
-                        <input
-                            type="date"
-                            className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-300 focus:border-[#CC0000] focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20"
-                            value={dataFim}
-                            onChange={(event) => onDataFimChange(event.target.value)}
-                        />
-                    </div>
+                <div className="min-w-[140px] flex-1">
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        De
+                    </label>
+                    <input
+                        type="date"
+                        className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-300 focus:border-[#CC0000] focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20"
+                        value={dataInicio}
+                        onChange={(event) => onDataInicioChange(event.target.value)}
+                    />
                 </div>
+
+                <div className="min-w-[140px] flex-1">
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        Até
+                    </label>
+                    <input
+                        type="date"
+                        className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-300 focus:border-[#CC0000] focus:outline-none focus:ring-2 focus:ring-[#CC0000]/20"
+                        value={dataFim}
+                        onChange={(event) => onDataFimChange(event.target.value)}
+                    />
+                </div>
+
             </div>
         </div>
     )

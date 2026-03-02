@@ -222,7 +222,7 @@ export default function NotificacoesPage() {
                             />
                             <div className="hidden items-center gap-2 sm:flex">
                                 <button onClick={() => setFiltro('todas')} className={`h-10 rounded-xl px-4 text-xs font-bold uppercase tracking-wider transition-colors ${filtro === 'todas' ? 'bg-gray-900 text-white' : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'}`}>Todas</button>
-                                <button onClick={() => setFiltro('nao_lidas')} className={`h-10 rounded-xl px-4 text-xs font-bold uppercase tracking-wider transition-colors ${filtro === 'nao_lidas' ? 'bg-[#CC0000] text-white' : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'}`}>Nao lidas</button>
+                                <button onClick={() => setFiltro('nao_lidas')} className={`h-10 rounded-xl px-4 text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap ${filtro === 'nao_lidas' ? 'bg-[#CC0000] text-white' : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'}`}>Não lidas</button>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">

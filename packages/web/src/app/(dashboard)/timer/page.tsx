@@ -425,26 +425,34 @@ export default function TimerPage() {
                         <History className="w-4 h-4" /> Treinos Frequentes
                     </p>
                     {presetsDb.map(preset => (
-                        <button
+                        <div
                             key={preset.id}
-                            onClick={() => aplicarPreset(preset)}
-                            className="w-full relative bg-white border border-gray-200 rounded-2xl p-4 text-left hover:border-red-200 hover:bg-red-50/20 transition-all group shadow-sm flex items-center justify-between overflow-hidden"
+                            className="w-full relative bg-white border border-gray-200 rounded-2xl p-4 text-left hover:border-red-200 hover:bg-red-50/20 transition-all group shadow-sm flex items-center justify-between gap-3"
                         >
-                            <div className="space-y-1 z-10">
-                                <h4 className="text-sm font-bold text-gray-900 group-hover:text-red-700 transition-colors pr-8">{preset.nome}</h4>
+                            <button
+                                onClick={() => aplicarPreset(preset)}
+                                className="flex-1 text-left space-y-1 min-w-0"
+                            >
+                                <h4 className="text-sm font-bold text-gray-900 group-hover:text-red-700 transition-colors truncate">{preset.nome}</h4>
                                 <p className="text-xs font-semibold text-gray-500">{preset.descricao}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Play className="w-4 h-4 text-gray-300 group-hover:text-red-500 transition-colors" />
-                                <div
+                            </button>
+                            <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                    onClick={() => aplicarPreset(preset)}
+                                    className="p-2 text-gray-300 group-hover:text-red-500 transition-colors hover:bg-red-50 rounded-lg"
+                                    title="Aplicar preset"
+                                >
+                                    <Play className="w-4 h-4" />
+                                </button>
+                                <button
                                     onClick={(e) => handleExcluirPreset(e, preset.id, preset.nome)}
-                                    className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all absolute top-2 right-2 flex items-center justify-center pointer-events-auto"
+                                    className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                                     title="Excluir Preset"
                                 >
                                     <Trash2 className="w-4 h-4" />
-                                </div>
+                                </button>
                             </div>
-                        </button>
+                        </div>
                     ))}
                 </div>
 

@@ -267,10 +267,9 @@ export default function AlunoDetalhePage() {
 
             {/* Header Profile Premium */}
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden relative">
-                {/* Banner / Cover Plate */}
+                {/* Banner / Cover */}
                 <div className="h-32 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-900 w-full relative">
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-90" />
-                    <div className="absolute -bottom-10 right-0 w-64 h-64 bg-[#CC0000] blur-[100px] rounded-full opacity-20 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-gray-800/60 to-gray-900/95" />
                 </div>
 
                 <div className="px-6 sm:px-10 pb-8">
@@ -281,15 +280,15 @@ export default function AlunoDetalhePage() {
                             <AvatarInitials nome={aluno.nome} fotoUrl={aluno.foto_url} size="xl" />
                         </div>
 
-                        {/* Info principal container */}
+                        {/* Info principal container — parte sobre o banner (precisa de texto branco) */}
                         <div className="flex-1 min-w-0 flex flex-col md:flex-row justify-between md:items-end gap-6 pb-2">
                             <div>
                                 <div className="flex items-center gap-3 flex-wrap mb-1.5">
-                                    <h2 className="text-3xl font-black text-gray-900 tracking-tight">{aluno.nome}</h2>
+                                    <h2 className="text-3xl font-black text-white tracking-tight drop-shadow-sm">{aluno.nome}</h2>
                                     <StatusBadge status={aluno.status} />
                                 </div>
-                                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                    Membro Desde <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md">{formatDate(aluno.data_cadastro || aluno.created_at)}</span>
+                                <p className="text-sm font-bold text-gray-300 uppercase tracking-widest flex items-center gap-2">
+                                    Membro Desde <span className="bg-white/10 text-white px-2.5 py-1 rounded-md backdrop-blur-sm">{formatDate(aluno.data_cadastro || aluno.created_at)}</span>
                                 </p>
                             </div>
 
